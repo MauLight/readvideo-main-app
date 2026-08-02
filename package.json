@@ -9,6 +9,8 @@
     "electron"
   ],
   "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "//setup": "One command from a fresh clone: install, build all three, package the .app.",
     "build": "npm run build:backend && npm run build:renderer && npm run build:shell",
     "//build": "Order matters: the shell imports back-end/dist and serves front-end/out.",
     "build:backend": "npm run build --workspace back-end",
