@@ -42,6 +42,11 @@ npm start       # builds everything in order, then launches
 Build order is fixed and the root scripts enforce it: the shell imports
 `back-end/dist` and serves `front-end/out`, so both must exist first.
 
+The first `npm start` downloads the Electron runtime (~100 MB) before the
+window appears — Electron 43 fetches it on first use rather than during
+`npm install`, so a quick install is normal and the wait comes later. It's
+cached afterwards.
+
 On first launch the app asks for your two keys. They're encrypted into the
 keychain and persist, so it's a one-time step.
 
