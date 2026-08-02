@@ -5,15 +5,17 @@
   "description": "Electron shell for AI Learner: serves the built renderer and runs the backend in the main process.",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc -p .",
+    "build": "node build.mjs",
     "start": "npm run build && electron .",
     "//dev": "Loads the Next dev server for HMR \u2014 run `npm run dev` in front-end first.",
     "dev": "npm run build && RENDERER_URL=http://localhost:3000 electron .",
-    "typecheck": "tsc -p . --noEmit"
+    "typecheck": "tsc -p . --noEmit",
+    "//typecheck": "esbuild only strips types, so this is the real check."
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "electron": "^43.2.0",
+    "esbuild": "^0.28.1",
     "typescript": "^7.0.2"
   },
   "dependencies": {

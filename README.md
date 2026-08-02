@@ -72,6 +72,12 @@ switch back.
 | `npm run dev:renderer` / `dev:shell` | The two-terminal dev loop |
 | `npm run typecheck` | Types across all three, no emit |
 
+The shell is bundled with esbuild rather than emitted file-by-file, so the
+packaged app carries no `node_modules` and no workspace symlink — everything
+main reaches, including the backend's runners and the OpenAI SDK, is inlined
+into `electron/dist/main.js`. esbuild only strips types, so `npm run typecheck`
+is the real check.
+
 ## Notes
 
 - `SMOKE=1` runs the shell headlessly: it asserts the renderer loaded,
