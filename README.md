@@ -48,6 +48,10 @@ The app is unsigned, which is fine because you built it: macOS only blocks
 unsigned apps that arrive with a quarantine flag, and locally built ones don't
 have it.
 
+The build follows your machine's architecture — Apple Silicon produces an
+arm64 app, an Intel Mac produces x64 — so there's nothing to configure either
+way.
+
 To run from source instead, without packaging:
 
 ```bash

@@ -23,9 +23,12 @@ extraResources:
 asar: true
 
 mac:
+  # No arch pinned on purpose. Everyone builds on their own machine, so the
+  # host architecture is the right one — an Intel Mac produces x64 here without
+  # anyone configuring anything. A universal binary would only matter for
+  # shipping a prebuilt artifact, and would roughly double the download.
   target:
-    - target: dmg
-      arch: arm64
+    - dmg
   category: public.app-category.education
   # No Developer ID: the app is built on the user's own machine, so it is never
   # quarantined and Gatekeeper doesn't ask. Signing only matters for downloads.
