@@ -1,4 +1,8 @@
-import { YoutubeTranscript } from "youtube-transcript";
+import {
+  YoutubeTranscript,
+  YoutubeTranscriptNotAvailableLanguageError,
+} from "youtube-transcript";
+import { config } from "../config.js";
 
 // YouTube video ids are exactly 11 chars of [A-Za-z0-9_-].
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
@@ -75,6 +79,8 @@ export interface TranscriptData {
   text: string;
   /** Individual timestamped segments. */
   segments: TranscriptSegment[];
+  /** ISO code of the track we actually got, when YouTube reports one. */
+  lang?: string;
 }
 
 /**
@@ -89,7 +95,20 @@ export async function getTranscriptData(url: string): Promise<TranscriptData> {
   }
 
   try {
-    const raw = await YoutubeTranscript.fetchTranscript(videoId);
+    // Ask for the preferred track first: plenty of videos carry English
+    // captions alongside the original. When there is no such track, fall back
+    // to YouTube's default rather than failing — the prompt pins the output
+    // language, so a foreign transcript still yields an English article.
+    let raw;
+    try {
+      raw = await YoutubeTranscript.fetchTranscript(videoId, {
+        lang: config.transcriptLang,
+      });
+    } catch (err) {
+      if (!(err instanceof YoutubeTranscriptNotAvailableLanguageError)) throw err;
+      raw = await YoutubeTranscript.fetchTranscript(videoId);
+    }
+
     if (!raw.length) {
       throw new TranscriptError("No transcript is available for this video.");
     }
@@ -98,7 +117,11 @@ export async function getTranscriptData(url: string): Promise<TranscriptData> {
       offset: s.offset,
       duration: s.duration,
     }));
-    return { text: segments.map((s) => s.text).join(" "), segments };
+    return {
+      text: segments.map((s) => s.text).join(" "),
+      segments,
+      lang: raw[0]?.lang,
+    };
   } catch (err) {
     if (err instanceof TranscriptError) throw err;
     const message = err instanceof Error ? err.message : "Unknown error";

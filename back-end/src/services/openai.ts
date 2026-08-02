@@ -57,12 +57,17 @@ const STYLE_MAP: Record<WritingStyle, { writer: string; post: string }> = {
 
 function buildPrompt(transcript: string, style: WritingStyle): string {
   const { writer, post } = STYLE_MAP[style];
+  const { articleLanguage } = config;
   return `Act as a ${writer} who is great at writing. Help me write a ${post} based on a YouTube video. I am going to give you the video transcript so you can turn it into a ${post}. Use Markdown so it's easier to read.
+
+Write the ${post} in ${articleLanguage}. The transcript may be in another language — if it is, translate the content into ${articleLanguage} rather than answering in the transcript's language.
 
 If the video includes specific technical information, preserve it accurately and present it clearly using Markdown: keep mathematical formulas (use LaTeX/math notation when appropriate), reproduce step-by-step instructions as ordered lists, format word or term definitions clearly, and keep any code in fenced code blocks. Do not omit or oversimplify this technical detail.
 
 YouTube Video Transcript:
-${transcript}`;
+${transcript}
+
+Remember: the ${post} must be written in ${articleLanguage}.`;
 }
 
 /**
