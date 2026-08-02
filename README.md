@@ -70,6 +70,30 @@ cached afterwards.
 On first launch the app asks for your two keys. They're encrypted into the
 keychain and persist, so it's a one-time step.
 
+## Rebuilding after a change
+
+All of these run from the repo root; they drive the workspaces in the order the
+build requires.
+
+```bash
+npm run package   # rebuild the .app after editing anything
+npm start         # build and run, without packaging
+```
+
+`npm run package` **overwrites in place** — output is named from the version
+and architecture (`ReadVideo-0.1.0-arm64.dmg`), so rebuilding the same version
+replaces the same files. Two things follow:
+
+- Bumping the version produces a new filename and leaves the old DMG behind;
+  `electron/release/` accumulates until you clear it. `rm -rf electron/release`
+  is the clean reset, worth doing if you change target or architecture, since
+  packaging overwrites rather than cleans.
+- A copy you dragged to /Applications is *not* updated. Drag the new one over.
+
+The packaged app is a snapshot. Nothing links it back to the source, so an edit
+isn't visible until you package again — use `npm start` or the dev loop below
+while iterating.
+
 ## Developing
 
 ```bash
