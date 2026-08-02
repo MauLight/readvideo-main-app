@@ -32,7 +32,7 @@ The renderer already codes against a `DesktopBridge` contract
 | M4 YouTube oEmbed in main | done |
 | M5 streaming runners over IPC | done (unverified with a real key) |
 | M6 player + print verification | done |
-| M7 packaging | |
+| M7 packaging | done — unsigned .app/.dmg via electron-builder |
 
 ## Scripts
 

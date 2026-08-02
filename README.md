@@ -34,6 +34,22 @@ by the main process when it makes a request — they never cross into the page.
 
 ## Build and run
 
+From a fresh clone, one command does everything — install, build all three,
+and package the app:
+
+```bash
+npm run setup
+```
+
+It leaves `ReadVideo.app` in `electron/release/mac-arm64/`. Drag it to
+/Applications, or open it where it is.
+
+The app is unsigned, which is fine because you built it: macOS only blocks
+unsigned apps that arrive with a quarantine flag, and locally built ones don't
+have it.
+
+To run from source instead, without packaging:
+
 ```bash
 npm install     # one install for all three workspaces
 npm start       # builds everything in order, then launches
