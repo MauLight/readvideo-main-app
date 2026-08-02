@@ -10,15 +10,19 @@
     "//dev": "Loads the Next dev server for HMR \u2014 run `npm run dev` in front-end first.",
     "dev": "npm run build && RENDERER_URL=http://localhost:3000 electron .",
     "typecheck": "tsc -p . --noEmit",
-    "//typecheck": "esbuild only strips types, so this is the real check."
+    "//typecheck": "esbuild only strips types, so this is the real check.",
+    "package": "npm run build && electron-builder --config electron-builder.yml"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "electron": "^43.2.0",
+    "electron": "43.2.0",
+    "electron-builder": "^26.15.3",
     "esbuild": "^0.28.1",
-    "typescript": "^7.0.2"
-  },
-  "dependencies": {
+    "typescript": "^7.0.2",
     "back-end": "*"
-  }
+  },
+  "//package": "Builds the .app/.dmg. Renderer and backend must be built first \u2014 use the root `npm run package`.",
+  "author": "Mau Ulisse Luz",
+  "//electron": "Pinned, not ranged: electron-builder needs an exact version to fetch matching binaries, and runtime upgrades should be deliberate.",
+  "//back-end": "devDependency on purpose: esbuild inlines it, so nothing needs it at runtime."
 }

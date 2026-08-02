@@ -18,7 +18,9 @@
     "dev:renderer": "npm run dev --workspace front-end",
     "dev:shell": "npm run dev --workspace electron",
     "//dev": "Two terminals: dev:renderer first, then dev:shell (which points the window at it for HMR).",
-    "typecheck": "npm run typecheck --workspace electron && tsc --noEmit -p front-end && tsc --noEmit -p back-end"
+    "typecheck": "npm run typecheck --workspace electron && tsc --noEmit -p front-end && tsc --noEmit -p back-end",
+    "package": "npm run build && npm run package --workspace electron",
+    "//package": "Full chain, then the macOS .app/.dmg into electron/release/."
   },
   "engines": {
     "node": ">=20"

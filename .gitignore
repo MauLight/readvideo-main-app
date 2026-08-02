@@ -13,3 +13,6 @@ out/
 
 .DS_Store
 *.log
+
+# Packaged output
+release/

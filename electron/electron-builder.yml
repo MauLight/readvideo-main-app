@@ -1,0 +1,38 @@
+appId: com.maulight.readvideo
+productName: ReadVideo
+copyright: © Ctlst
+
+directories:
+  output: release
+  buildResources: build
+
+# The shell is bundled by esbuild, so only the bundle ships — no node_modules,
+# no workspace symlink, nothing from back-end/ or front-end/ source.
+files:
+  - dist/**/*
+  - package.json
+
+# The renderer is served from disk over http://127.0.0.1, so it can't live
+# inside the asar. main resolves it as resourcesPath/renderer when packaged.
+extraResources:
+  - from: ../front-end/out
+    to: renderer
+    filter:
+      - "**/*"
+
+asar: true
+
+mac:
+  target:
+    - target: dmg
+      arch: arm64
+  category: public.app-category.education
+  # No Developer ID: the app is built on the user's own machine, so it is never
+  # quarantined and Gatekeeper doesn't ask. Signing only matters for downloads.
+  identity: null
+
+dmg:
+  title: ReadVideo
+
+# Nothing is published from here; distribution is "clone and build".
+publish: null
