@@ -1,0 +1,22 @@
+{
+  "name": "ai-learner-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron shell for AI Learner: serves the built renderer and runs the backend in the main process.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "npm run build && electron .",
+    "//dev": "Loads the Next dev server for HMR \u2014 run `npm run dev` in front-end first.",
+    "dev": "npm run build && RENDERER_URL=http://localhost:3000 electron .",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron": "^43.2.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "back-end": "*"
+  }
+}

@@ -1,0 +1,15 @@
+node_modules/
+
+# Build output
+dist/
+out/
+.next/
+*.tsbuildinfo
+
+# Credentials — the app stores real keys in the OS keychain, never here
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log

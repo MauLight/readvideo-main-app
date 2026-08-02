@@ -1,0 +1,26 @@
+{
+  "name": "readvideo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Turn YouTube videos and playlists into readable articles. Desktop app: Next.js renderer, Express-derived runners, Electron shell.",
+  "workspaces": [
+    "back-end",
+    "front-end",
+    "electron"
+  ],
+  "scripts": {
+    "build": "npm run build:backend && npm run build:renderer && npm run build:shell",
+    "//build": "Order matters: the shell imports back-end/dist and serves front-end/out.",
+    "build:backend": "npm run build --workspace back-end",
+    "build:renderer": "npm run build --workspace front-end",
+    "build:shell": "npm run build --workspace electron",
+    "start": "npm run build && npm start --workspace electron",
+    "dev:renderer": "npm run dev --workspace front-end",
+    "dev:shell": "npm run dev --workspace electron",
+    "//dev": "Two terminals: dev:renderer first, then dev:shell (which points the window at it for HMR).",
+    "typecheck": "npm run typecheck --workspace electron && tsc --noEmit -p front-end && tsc --noEmit -p back-end"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
