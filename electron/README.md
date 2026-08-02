@@ -1,4 +1,4 @@
-# ai-learner-desktop
+# readvideo-desktop
 
 Electron shell for AI Learner. Sits alongside the other two repos:
 

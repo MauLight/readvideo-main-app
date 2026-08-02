@@ -1,5 +1,5 @@
 {
-  "name": "ai-learner-desktop",
+  "name": "readvideo-desktop",
   "version": "0.1.0",
   "private": true,
   "description": "Electron shell for AI Learner: serves the built renderer and runs the backend in the main process.",
@@ -24,5 +24,6 @@
   "//package": "Builds the .app/.dmg. Renderer and backend must be built first \u2014 use the root `npm run package`.",
   "author": "Mau Ulisse Luz",
   "//electron": "Pinned, not ranged: electron-builder needs an exact version to fetch matching binaries, and runtime upgrades should be deliberate.",
-  "//back-end": "devDependency on purpose: esbuild inlines it, so nothing needs it at runtime."
+  "//back-end": "devDependency on purpose: esbuild inlines it, so nothing needs it at runtime.",
+  "//name": "Drives app.getName(), and so the userData path \u2014 keep it aligned with productName in electron-builder.yml."
 }

@@ -6,7 +6,7 @@ import { cancelAll } from "./stream-bridge.js";
 import { runSmokeCheck } from "./smoke.js";
 
 /**
- * Electron shell for AI Learner.
+ * Electron shell for ReadVideo.
  *
  * The renderer is a static Next.js export, served over http://127.0.0.1 rather
  * than file:// — not for the transport, but because the YouTube iframe player
@@ -14,11 +14,21 @@ import { runSmokeCheck } from "./smoke.js";
  * instead (see the DesktopBridge contract in the front-end).
  */
 
+/**
+ * Pin the name before anything asks for a path.
+ *
+ * app.getName() otherwise falls back to package.json's `name`, which differs
+ * from productName and differs again between dev and packaged — three possible
+ * userData directories, and stored keys that seem to vanish when you switch.
+ * Setting it once keeps the data directory the same everywhere.
+ */
+app.setName("ReadVideo");
+
 /** Where the built renderer lives, packaged or not. */
 function rendererRoot(): string {
   return app.isPackaged
     ? path.join(process.resourcesPath, "renderer")
-    : // dist/main.js -> electron/ -> ai learner/ -> front-end/out
+    : // dist/main.js -> electron/ -> repo root -> front-end/out
       path.join(__dirname, "..", "..", "front-end", "out");
 }
 
