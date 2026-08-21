@@ -49,6 +49,12 @@ interface VideoContextValue {
   committed: boolean;
   setCommitted: (committed: boolean) => void;
   status: ArticleStatus;
+  /**
+   * The link is ready to transcribe: its preview loaded, or a failed run can
+   * be retried. Derived from `status` so consumers can't drift apart on what
+   * "ready" means.
+   */
+  canTranscribe: boolean;
   meta: VideoMeta | null;
   article: string;
   /** Playlist chapters, in manifest order. Empty for a single video. */
@@ -99,6 +105,8 @@ export function VideoProvider({ children }: { children: ReactNode }) {
     []
   );
   const [status, setStatus] = useState<ArticleStatus>("idle");
+  // Ready once the preview is loaded, or to retry after a failure.
+  const canTranscribe = status === "preview" || status === "error";
   const [meta, setMeta] = useState<VideoMeta | null>(null);
   const [article, setArticle] = useState("");
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -350,6 +358,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
         committed,
         setCommitted,
         status,
+        canTranscribe,
         meta,
         article,
         chapters,

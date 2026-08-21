@@ -12,7 +12,7 @@ export default function PreviewVideo() {
   if (!link || !meta || status !== "preview") return null;
 
   return (
-    <div className="relative w-full flex gap-10 border border-border-form rounded-lg overflow-hidden bg-[#0d0d0d]">
+    <div className="relative w-full flex gap-10 border border-border-form rounded-xl overflow-hidden bg-[#0d0d0d]/30 backdrop-blur-lg">
       <div className="w-70 aspect-video relative">
         <Image
           src={meta.thumbnail}

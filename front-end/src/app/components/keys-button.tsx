@@ -23,10 +23,10 @@ export default function KeysButton() {
         type="button"
         onClick={handleOpen}
         aria-label="Change API keys"
-        className="flex items-center gap-1.5 rounded-lg border border-border px-3 h-9 text-text2 hover:text-text cursor-pointer"
+        className="flex items-center gap-1.5 rounded-lg border border-border  px-4 h-9 text-[#b8b8b9] text-[0.9rem] hover:text-text cursor-pointer"
       >
-        <KeyRound className="w-4 h-4" />
-        <span className="text-small">Keys</span>
+        <KeyRound className="w-3.5 h-3.5" />
+        Keys
       </button>
 
       {/* Portalled to body: this button sits inside a z-20 stacking context,
@@ -37,7 +37,7 @@ export default function KeysButton() {
           <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 backdrop-blur-md px-6">
             <KeyForm onClose={handleClose} />
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

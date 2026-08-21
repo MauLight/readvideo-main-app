@@ -64,6 +64,8 @@ Write the ${post} in ${articleLanguage}. The transcript may be in another langua
 
 If the video includes specific technical information, preserve it accurately and present it clearly using Markdown: keep mathematical formulas (use LaTeX/math notation when appropriate), reproduce step-by-step instructions as ordered lists, format word or term definitions clearly, and keep any code in fenced code blocks. Do not omit or oversimplify this technical detail.
 
+Delimit math with dollar signs — $...$ inline and $$...$$ for a formula on its own line. Do not use \\( \\) or \\[ \\], which the renderer does not parse.
+
 YouTube Video Transcript:
 ${transcript}
 

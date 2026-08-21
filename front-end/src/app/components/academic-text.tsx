@@ -26,7 +26,7 @@ export default function AcademicText() {
         <motion.div
           key="loading"
           {...fade}
-          className="h-full flex items-center justify-center gap-2 text-text2"
+          className="h-full flex items-center justify-center gap-2 text-[#b8b8b9]"
         >
           <span className="w-4 h-4 border-2 border-current/40 border-t-current rounded-full animate-spin" />
           Loading
@@ -37,7 +37,7 @@ export default function AcademicText() {
         <motion.div
           key="error"
           {...fade}
-          className="h-full flex items-center justify-center text-center text-text2 px-6"
+          className="h-full flex items-center justify-center text-center text-[#b8b8b9] px-6"
         >
           The service is unavailable right now, please try again later
         </motion.div>
@@ -50,9 +50,9 @@ export default function AcademicText() {
               type="button"
               onClick={handlePrint}
               aria-label="Print article"
-              className="absolute top-4 right-0 z-10 flex items-center gap-1.5 rounded-lg border border-border px-3 h-9 text-text2 hover:text-text bg-[#0d0d0d] cursor-pointer"
+              className="absolute top-4 right-0 z-10 flex items-center gap-1.5 rounded-lg border border-border px-4 h-9 text-[#b8b8b9] text-[0.9rem] hover:text-text bg-[#0d0d0d] cursor-pointer"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-3.5 h-3.5" />
               Print
             </button>
           )}

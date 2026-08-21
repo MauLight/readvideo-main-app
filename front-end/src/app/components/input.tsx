@@ -35,13 +35,13 @@ export default function Input({
   const pastedClass =
     kind === "playlist"
       ? "bg-amber-500 border-t border-amber-700 shadow shadow-amber-600"
-      : "bg-green-600 border-t border-green-800 shadow shadow-green-700";
+      : "bg-[#0f743f] border-t border-[#2f945f] shadow shadow-[#0f541f]";
 
   const borderClass = error
-    ? "bg-red-700 border-t border-red-900 shadow shadow-red-800"
+    ? "bg-red-800 border-t border-red-700 shadow shadow-red-800"
     : pasted
       ? pastedClass
-      : "bg-[#191919] border-t border-border shadow shadow-[#212121]";
+      : "bg-[#121213] shadow-xl shadow-[#0d0d0f] border-t border-[#1f1f20]";
 
   // Clear button shows on error, or whenever the parent asks for it (success).
   const clearVisible = error || showClear;
@@ -55,14 +55,14 @@ export default function Input({
         onFocus={onFocus}
         name={label}
         placeholder={label}
-        className={`h-12 ${borderClass} rounded-lg pl-3 pr-20 w-full outline-0 text-dark2 dark:text-text2 resize-none overflow-hidden`}
+        className={`h-15 ${borderClass} rounded-xl pl-3 pr-20 w-full outline-0 text-[#b8b8b9] placeholder-[#49494a] resize-none overflow-hidden`}
       />
       {clearVisible && (
         <button
           type="button"
           onClick={handleClear}
           aria-label="Clear input"
-          className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center border border-border rounded-lg px-3 h-8 text-dark2 dark:text-text2 bg-black"
+          className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center border border-teal-950 rounded-lg px-3 h-8 text-[#b8b8b9] bg-teal-950"
         >
           clear
         </button>

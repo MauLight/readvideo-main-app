@@ -24,10 +24,10 @@ export default function StatusComponent({
   if (status === "success") {
     // One step darker than the input's fill, so text stays legible on black.
     const accentClass =
-      kind === "playlist" ? "text-amber-600" : "text-green-600";
+      kind === "playlist" ? "text-amber-600" : "text-[#0f743f]";
 
     return (
-      <div className={`flex items-center gap-2 ${accentClass}`}>
+      <div className={`ml-10 flex items-center gap-2 ${accentClass}`}>
         <CircleCheck className="w-4 h-4" />
         Success
       </div>

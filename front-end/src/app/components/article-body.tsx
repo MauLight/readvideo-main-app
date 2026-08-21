@@ -1,11 +1,12 @@
 "use client";
 
-import { Ref } from "react";
+import { Ref, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm"; // tables, task lists, strikethrough
 import remarkMath from "remark-math"; // parses $...$ and $$...$$
 import rehypeKatex from "rehype-katex"; // renders the parsed math
 import "katex/dist/katex.min.css"; // required, or formulas render unstyled
+import { normalizeMath } from "../lib/normalize-math";
 
 const remarkPlugins = [remarkGfm, remarkMath];
 const rehypePlugins = [rehypeKatex];
@@ -29,7 +30,7 @@ const markdownComponents = {
     <ol className="list-decimal pl-6 flex flex-col gap-y-1" {...props} />
   ),
   a: (props: React.ComponentProps<"a">) => (
-    <a className="text-primary underline" {...props} />
+    <a className="text-[#337fc5] underline" {...props} />
   ),
   strong: (props: React.ComponentProps<"strong">) => (
     <strong className="font-semibold text-text" {...props} />
@@ -50,11 +51,17 @@ const markdownComponents = {
   // Tables come from remark-gfm; keep wide ones scrollable, not page-breaking.
   table: (props: React.ComponentProps<"table">) => (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-left text-[0.9rem]" {...props} />
+      <table
+        className="w-full border-collapse text-left text-[0.9rem]"
+        {...props}
+      />
     </div>
   ),
   th: (props: React.ComponentProps<"th">) => (
-    <th className="border border-border px-3 py-1.5 font-semibold text-text" {...props} />
+    <th
+      className="border border-border px-3 py-1.5 font-semibold text-text"
+      {...props}
+    />
   ),
   td: (props: React.ComponentProps<"td">) => (
     <td className="border border-border px-3 py-1.5" {...props} />
@@ -96,10 +103,14 @@ export default function ArticleBody({
   className = "",
   ref,
 }: ArticleBodyProps) {
+  // Runs on every streamed chunk, so keep it off the render path when the
+  // text hasn't moved.
+  const source = useMemo(() => normalizeMath(markdown), [markdown]);
+
   return (
     <article
       ref={ref}
-      className={`flex flex-col gap-y-4 text-text2 leading-relaxed ${className}`}
+      className={`flex flex-col gap-y-4 text-text-[#c9c9c2] font-body leading-relaxed ${className}`}
     >
       {markdown ? (
         <ReactMarkdown
@@ -107,7 +118,7 @@ export default function ArticleBody({
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}
         >
-          {markdown}
+          {source}
         </ReactMarkdown>
       ) : (
         <Skeleton />

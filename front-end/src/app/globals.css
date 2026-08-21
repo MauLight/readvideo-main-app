@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+/* Tailwind v4 resolves `dark:` against prefers-color-scheme by default, which
+   would leave the theme toggle unable to reach the `dark:` utilities already
+   in use. Point the variant at the class ThemeProvider sets on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-primary: #2470a6;
-  --color-primary-shadow: #008a97;
   --color-secondary: #db6015;
   --color-accent: #6015db;
   --color-success: #76bc21;
@@ -43,6 +46,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Both loaded in layout.tsx. `inline` matters here: the variables are set on
+     <html> at runtime, so Tailwind must emit the reference rather than resolve
+     it at build time. These give the `font-title` / `font-body` utilities. */
+  --font-title: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-noto-serif-jp), ui-serif, Georgia, serif;
 }
 
 @media (prefers-color-scheme: dark) {

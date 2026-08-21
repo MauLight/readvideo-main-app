@@ -4,10 +4,17 @@ import { motion } from "motion/react";
 import { ListVideo, RefreshCcw, SquarePlay, TextInitial } from "lucide-react";
 import { useVideo } from "../context/video-context";
 
-const RED = "#fa222f";
-const GREEN = "#00a63e"; // green-600 in sRGB — the input's video accent
+const RED = "#9f0712";
+const GREEN = "#0f743f";
 const AMBER = "#fe9a00"; // amber-500 in sRGB — the input's playlist accent
 const COLOR_FADE = { duration: 0.6, ease: "easeInOut" as const };
+/** Seconds per revolution. Tailwind's animate-spin is a fixed 1s — raise to slow. */
+const SPIN_SECONDS = 2.5;
+const SPIN = {
+  duration: SPIN_SECONDS,
+  ease: "linear" as const,
+  repeat: Infinity,
+};
 
 export default function Graphic() {
   const { status, kind, toggleKind } = useVideo();
@@ -19,7 +26,7 @@ export default function Graphic() {
 
   return (
     <div className="w-full h-full flex justify-center items-center pb-40">
-      <div className="w-100 h-100 flex justify-center items-center border border-[#1f1f1f] rounded-full relative">
+      <div className="w-100 h-100 flex justify-center items-center border border-[#3f3f3a] rounded-full relative">
         <div className="absolute w-full h-full flex justify-center items-center">
           <div className="flex items-center gap-x-5">
             <div
@@ -36,15 +43,15 @@ export default function Graphic() {
                   <>
                     {kind === "video" ? (
                       <>
-                        <SquarePlay className="w-10 h-10 text-faded-light" />
-                        <p className="text-[#898989] uppercase text-[0.8rem] font-semibold">
+                        <SquarePlay className="w-10 h-10 text-[#c9c9c2]" />
+                        <p className="text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
                           Video
                         </p>
                       </>
                     ) : (
                       <>
-                        <ListVideo className="w-10 h-10 text-faded-light" />
-                        <p className="text-[#898989] uppercase text-[0.8rem] font-semibold">
+                        <ListVideo className="w-10 h-10 text-[#c9c9c2]" />
+                        <p className="text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
                           Playlist
                         </p>
                       </>
@@ -64,8 +71,15 @@ export default function Graphic() {
                 animate={{ borderColor: accent }}
                 transition={COLOR_FADE}
               />
-              {/* Inherits the animated colour through currentColor. */}
-              <RefreshCcw className="w-10 h-10 animate-spin" />
+              {/* Inherits the animated colour through currentColor. The
+                  wrapper carries the spin so the icon keeps inheriting. */}
+              <motion.div
+                className="flex"
+                animate={{ rotate: 360 }}
+                transition={SPIN}
+              >
+                <RefreshCcw className="w-10 h-10" />
+              </motion.div>
               <motion.div
                 className="w-10 border-b animate-pulse"
                 animate={{ borderColor: accent }}
@@ -99,8 +113,8 @@ export default function Graphic() {
                   transition={COLOR_FADE}
                 />
                 <div className="z-50 w-35 h-40 flex flex-col gap-y-1 justify-center items-center border border-border rounded-xl bg-linear-to-b from-[#191919] to-[#111111]">
-                  <TextInitial className="w-10 h-10 text-faded-light" />
-                  <p className="text-[#898989] uppercase text-[0.8rem] font-semibold">
+                  <TextInitial className="w-10 h-10 text-[#c9c9c2]" />
+                  <p className="text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
                     Text
                   </p>
                 </div>
@@ -109,7 +123,7 @@ export default function Graphic() {
           </div>
         </div>
 
-        <div className="w-70 h-70 border border-[#1f1f1f] rounded-full" />
+        <div className="w-70 h-70 border border-[#4f4f4b] rounded-full" />
       </div>
     </div>
   );

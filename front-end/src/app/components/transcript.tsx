@@ -36,19 +36,23 @@ function SegmentRow({ segment, onSeek, active, rowRef }: SegmentRowProps) {
       ref={rowRef}
       onClick={handleClick}
       className={`z-10 flex gap-x-3 h-10 items-center px-5 rounded-md cursor-pointer ${
-        active ? "bg-primary" : "bg-border-form hover:bg-[#222222]"
+        active ? "bg-[#337fc5]" : "bg-border-form hover:bg-[#222222]"
       }`}
     >
       <button
         type="button"
         onClick={handleClick}
-        className={`shrink-0 tabular-nums cursor-pointer ${
-          active ? "text-text" : "text-faded-dark hover:text-primary"
+        className={`shrink-0 text-[0.8rem] tabular-nums cursor-pointer ${
+          active ? "text-text" : "text-[#787879] hover:text-[#337fc5]"
         }`}
       >
         {formatTimestamp(segment.offset)}
       </button>
-      <p className="whitespace-pre-wrap leading-relaxed text-text2">
+      <p
+        className={`whitespace-pre-wrap leading-relaxed text-[#b8b8b9] text-[0.9rem] ${
+          active ? "text-text" : "text-[#b8b8b9] font-medium"
+        }`}
+      >
         {segment.text}
       </p>
     </div>
@@ -115,20 +119,20 @@ export default function Transcript() {
   if (!link || !committed || !segments?.length) return null;
 
   return (
-    <div className="relative w-full aspect-video">
+    <div className="relative w-full h-full">
       <div
         ref={scrollRef}
         className="absolute inset-0 overflow-y-auto scrollbar-hide border border-border-form rounded-lg p-4 bg-[#0d0d0d] z-10"
       >
         <div className="sticky -top-5 z-20 -mx-4 -mt-4 mb-2 px-4 pt-4 pb-3  flex items-center backdrop-blur-xs justify-between">
-          <span className="text-faded-dark z-10">Transcript</span>
+          <span className="text-[#b8b8b9] z-10">Transcript</span>
           <button
             type="button"
             onClick={handleToggle}
-            className={`rounded-md px-3 h-8 border cursor-pointer z-10 ${
+            className={`rounded-[10px] text-[0.9rem] px-4 h-9 border cursor-pointer z-10 ${
               sync
-                ? "bg-primary text-text border-primary"
-                : "border-border text-faded-dark"
+                ? "bg-[#337fc5] text-text border-[#337fc5]"
+                : "border-border text-[#b8b8b9] hover:text-text"
             }`}
           >
             Sync {sync ? "on" : "off"}

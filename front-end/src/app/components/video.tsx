@@ -19,12 +19,12 @@ export default function VideoComponent() {
   function handleLoad() {
     playerRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: "listening", id: 1, channel: "widget" }),
-      "https://www.youtube.com"
+      "https://www.youtube.com",
     );
   }
 
   return (
-    <div className="z-10 w-full aspect-video border border-border-light dark:border-border-form rounded-lg overflow-hidden">
+    <div className="z-10 w-full shrink-0 aspect-video border border-border-light dark:border-border-form rounded-lg overflow-hidden">
       <iframe
         ref={playerRef}
         onLoad={handleLoad}

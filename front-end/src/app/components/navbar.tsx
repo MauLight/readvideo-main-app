@@ -20,6 +20,7 @@ export default function Navbar() {
     setInputValue,
     setUrl,
     status: articleStatus,
+    canTranscribe,
     kind,
     generate,
     committed,
@@ -137,12 +138,8 @@ export default function Navbar() {
     }
   }
 
-  // Ready to transcribe once the preview is loaded, or to retry after a failure.
-  const canTranscribe =
-    articleStatus === "preview" || articleStatus === "error";
-
   return (
-    <nav className="z-10 w-full">
+    <nav className="z-50 w-full">
       <motion.div
         layout="position"
         transition={{ type: "spring", stiffness: 90, damping: 20 }}
@@ -151,7 +148,7 @@ export default function Navbar() {
       >
         {!committed && (
           <motion.div
-            className="absolute bottom-full inset-x-0 mb-10 flex flex-col"
+            className="absolute bottom-full inset-x-0 mb-10 flex flex-col gap-y-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: headerVisible ? 1 : 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -159,25 +156,29 @@ export default function Navbar() {
             <motion.div
               animate={{ opacity: articleStatus !== "idle" ? 0 : 1 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="flex gap-x-2 items-center"
+              className="flex gap-x-2 items-baseline"
             >
-              <FilePlay className="text-red-600 h-8 w-8" />
-              <h1 className="text-[2.3rem] text-[#fa222fafa] font-medium">
+              <FilePlay className="text-red-800 h-6 w-6" />
+              <h1 className="text-[6rem] lowercase text-[#c9c9c2] font-title font-medium leading-19">
                 Read Lecture Videos
               </h1>
             </motion.div>
-            <motion.p
+            <motion.div
               animate={{ opacity: articleStatus !== "idle" ? 0 : 1 }}
               transition={{ duration: 0.5, ease: "easeInOut", delay: 0.5 }}
-              className="text-[#a9a9a9]"
+              className="text-[#a9a9a2] text-[1.2rem] flex gap-x-1 items-center ml-10 font-title"
             >
-              Translate video lectures into academic text you can read.
-            </motion.p>
+              Translate
+              <YouTubeLogo />
+              lectures into academic text you can read.
+            </motion.div>
           </motion.div>
         )}
 
-        <div className="flex items-end">
-          <div className="flex-1">
+        <div className=" flex items-end">
+          {/* The indent lines the input up with the hero heading, which sits
+              behind an icon. Once committed the hero is gone, so it goes too. */}
+          <div className={`flex-1 max-w-202 ${committed ? "" : "ml-9"}`}>
             <Input
               label="Paste your link here"
               value={value}
@@ -202,13 +203,21 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={handleTranscribe}
-                  className="ml-5 h-12 px-5 rounded-lg border-t border-blue-500 bg-primary text-text cursor-pointer whitespace-nowrap"
+                  className="ml-5 h-15 px-7 rounded-xl bg-[#0f743f] border-t border-[#2f945f] shadow shadow-[#0f541f] text-[#d8d8d9] font-medium cursor-pointer whitespace-nowrap"
                 >
                   Transcribe
                 </button>
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Above the input while previewing. The hero occupies this same
+            anchor but has already faded to 0 by the time a link verifies, so
+            the two never show together. Once committed this unmounts and
+            VideoComponent takes over below the navbar. */}
+        <div className="absolute bottom-full left-10 max-w-200 inset-x-0 mb-5">
+          {!committed && <PreviewVideo />}
         </div>
 
         <div className="absolute top-full inset-x-0 mt-3 flex flex-col gap-8">
@@ -221,25 +230,19 @@ export default function Navbar() {
               <StatusComponent status={status} kind={kind} />
             </motion.div>
           )}
-
-          {!committed && status === "idle" && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: headerVisible ? 1 : 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="text-[#898989] text-[0.8rem] pl-2 mt-0.5"
-            >
-              Full support for <b className="text-accent-light pr-0.75">You</b>
-              <b className="bg-red-600 text-accent-light p-0.75 rounded-md mr-0.5">
-                Tube
-              </b>{" "}
-              videos.
-            </motion.p>
-          )}
-
-          {!committed && <PreviewVideo />}
         </div>
       </motion.div>
     </nav>
+  );
+}
+
+function YouTubeLogo() {
+  return (
+    <p className="font-title leading-7">
+      <b className="text-[#c8c8c9] pr-0.75">You</b>
+      <b className="bg-linear-to-b from-red-800 to-red-900 text-[#c8c8c9] p-0.75 rounded-md mr-0.5">
+        Tube
+      </b>
+    </p>
   );
 }

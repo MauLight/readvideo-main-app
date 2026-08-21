@@ -81,7 +81,7 @@ export default function KeyForm({ onClose }: { onClose?: () => void }) {
 
       <header className="flex flex-col gap-y-1">
         <div className="flex items-center gap-x-2">
-          <KeyRound className="w-5 h-5 text-primary" />
+          <KeyRound className="w-5 h-5 text-[#337fc5]" />
           <h1 className="text-subheader font-semibold text-text">
             {keys ? "Change your keys" : "Add your API keys"}
           </h1>
@@ -127,7 +127,7 @@ export default function KeyForm({ onClose }: { onClose?: () => void }) {
       <button
         type="submit"
         disabled={!valid || saving}
-        className="h-12 rounded-lg border-t border-blue-500 bg-primary text-text enabled:cursor-pointer disabled:opacity-50"
+        className="h-12 rounded-lg border-t border-blue-500 bg-[#337fc5] text-text enabled:cursor-pointer disabled:opacity-50"
       >
         {saving ? "Saving" : "Save and continue"}
       </button>

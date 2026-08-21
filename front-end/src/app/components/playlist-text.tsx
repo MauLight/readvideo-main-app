@@ -109,9 +109,8 @@ function ChapterSection({
 export default function PlaylistText() {
   const { status, chapters, playlistRunning } = useVideo();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { ref: allRef, print: printAll } = usePrintable<HTMLDivElement>(
-    "Playlist"
-  );
+  const { ref: allRef, print: printAll } =
+    usePrintable<HTMLDivElement>("Playlist");
 
   return (
     <AnimatePresence mode="wait">
@@ -143,13 +142,16 @@ export default function PlaylistText() {
               type="button"
               onClick={printAll}
               aria-label="Print the whole playlist"
-              className="absolute top-4 right-0 z-10 flex items-center gap-1.5 rounded-lg border border-border px-3 h-9 text-text2 hover:text-text bg-[#0d0d0d] cursor-pointer"
+              className="absolute top-4 right-0 z-10 flex items-center gap-1.5 rounded-[10px] border border-border px-4 h-9 text-[#b8b8b9] text-[0.9rem] hover:text-text bg-[#0d0d0d] cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               Print all
             </button>
           )}
-          <div ref={scrollRef} className="h-full overflow-y-auto scrollbar-hide">
+          <div
+            ref={scrollRef}
+            className="h-full overflow-y-auto scrollbar-hide"
+          >
             <div ref={allRef} className="flex flex-col gap-y-14 pt-18 pb-20">
               {chapters.map((chapter) => (
                 <ChapterSection
