@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { Renderer, Program, Mesh, Triangle } from 'ogl';
-import './WebThreads.css';
+import React, { useEffect, useRef } from "react";
+import { Renderer, Program, Mesh, Triangle } from "ogl";
+import "./WebThreads.css";
 
-export type FanMode = 'center' | 'left' | 'right';
+export type FanMode = "center" | "left" | "right";
 
 export interface WebThreadsProps {
   color1?: string;
@@ -32,7 +32,11 @@ export interface WebThreadsProps {
 const hexToRgb = (hex: string): [number, number, number] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!result) return [1, 1, 1];
-  return [parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255];
+  return [
+    parseInt(result[1], 16) / 255,
+    parseInt(result[2], 16) / 255,
+    parseInt(result[3], 16) / 255,
+  ];
 };
 
 const FAN_MODE: Record<FanMode, number> = { center: 0, left: 1, right: 2 };
@@ -154,16 +158,16 @@ type WebThreadsCtx = {
 const ctxMap = new WeakMap<HTMLDivElement, WebThreadsCtx>();
 
 const WebThreads: React.FC<WebThreadsProps> = ({
-  color1 = '#5227FF',
-  color2 = '#FF9FFC',
-  color3 = '#FFFFFF',
+  color1 = "#5227FF",
+  color2 = "#FF9FFC",
+  color3 = "#FFFFFF",
   speed = 0.2,
   threadCount = 6,
   frequency = 5.0,
   spread = 0.18,
   taper = 1.0,
   position = 0.5,
-  fanMode = 'center',
+  fanMode = "center",
   glow = 0.02,
   falloff = 0.6,
   thickness = 1.1,
@@ -175,10 +179,13 @@ const WebThreads: React.FC<WebThreadsProps> = ({
   grainIntensity = 0.05,
   mouseInteraction = true,
   mouseStrength = 0.3,
-  className = ''
+  className = "",
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mouseRef = useRef<{ enabled: boolean; strength: number }>({ enabled: true, strength: 0.3 });
+  const mouseRef = useRef<{ enabled: boolean; strength: number }>({
+    enabled: true,
+    strength: 0.3,
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -189,15 +196,15 @@ const WebThreads: React.FC<WebThreadsProps> = ({
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
     });
 
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
     const canvas = gl.canvas as HTMLCanvasElement;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.display = 'block';
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.display = "block";
     container.appendChild(canvas);
 
     const geometry = new Triangle(gl);
@@ -229,8 +236,8 @@ const WebThreads: React.FC<WebThreadsProps> = ({
         uMouse: { value: new Float32Array([0.5, 0.5]) },
         uMouseStrength: { value: 0.3 },
         uEnableMouse: { value: 1.0 },
-        uMouseActive: { value: 0 }
-      }
+        uMouseActive: { value: 0 },
+      },
     });
 
     const mesh = new Mesh(gl, { geometry, program });
@@ -241,7 +248,8 @@ const WebThreads: React.FC<WebThreadsProps> = ({
       const w = Math.max(1, Math.floor(rect.width));
       const h = Math.max(1, Math.floor(rect.height));
       renderer.setSize(w, h);
-      const res = (program.uniforms.iResolution as { value: Float32Array }).value;
+      const res = (program.uniforms.iResolution as { value: Float32Array })
+        .value;
       res[0] = gl.drawingBufferWidth;
       res[1] = gl.drawingBufferHeight;
       renderer.render({ scene: mesh });
@@ -268,9 +276,9 @@ const WebThreads: React.FC<WebThreadsProps> = ({
     const onMouseLeave = () => {
       targetActive = 0;
     };
-    canvas.addEventListener('mousemove', onMouseMove);
-    canvas.addEventListener('mouseenter', onMouseEnter);
-    canvas.addEventListener('mouseleave', onMouseLeave);
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mouseenter", onMouseEnter);
+    canvas.addEventListener("mouseleave", onMouseLeave);
 
     let raf = 0;
     let isVisible = true;
@@ -285,15 +293,21 @@ const WebThreads: React.FC<WebThreadsProps> = ({
       const mouse = (program.uniforms.uMouse as { value: Float32Array }).value;
       mouse[0] = currentMouse[0];
       mouse[1] = currentMouse[1];
-      (program.uniforms.uMouseActive as { value: number }).value = currentActive;
-      (program.uniforms.uEnableMouse as { value: number }).value = mouseRef.current.enabled ? 1.0 : 0.0;
-      (program.uniforms.uMouseStrength as { value: number }).value = mouseRef.current.strength;
+      (program.uniforms.uMouseActive as { value: number }).value =
+        currentActive;
+      (program.uniforms.uEnableMouse as { value: number }).value = mouseRef
+        .current.enabled
+        ? 1.0
+        : 0.0;
+      (program.uniforms.uMouseStrength as { value: number }).value =
+        mouseRef.current.strength;
       renderer.render({ scene: mesh });
       raf = requestAnimationFrame(loop);
     };
 
     const tryStart = () => {
-      if (isVisible && isPageVisible && raf === 0) raf = requestAnimationFrame(loop);
+      if (isVisible && isPageVisible && raf === 0)
+        raf = requestAnimationFrame(loop);
     };
     const tryStop = () => {
       if (raf !== 0) {
@@ -307,7 +321,7 @@ const WebThreads: React.FC<WebThreadsProps> = ({
         isVisible = entry.isIntersecting;
         isVisible ? tryStart() : tryStop();
       },
-      { threshold: 0 }
+      { threshold: 0 },
     );
     io.observe(container);
 
@@ -315,7 +329,7 @@ const WebThreads: React.FC<WebThreadsProps> = ({
       isPageVisible = !document.hidden;
       isPageVisible ? tryStart() : tryStop();
     };
-    document.addEventListener('visibilitychange', onVisibility);
+    document.addEventListener("visibilitychange", onVisibility);
 
     tryStart();
 
@@ -323,15 +337,15 @@ const WebThreads: React.FC<WebThreadsProps> = ({
       tryStop();
       ro.disconnect();
       io.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
-      canvas.removeEventListener('mousemove', onMouseMove);
-      canvas.removeEventListener('mouseenter', onMouseEnter);
-      canvas.removeEventListener('mouseleave', onMouseLeave);
+      document.removeEventListener("visibilitychange", onVisibility);
+      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mouseenter", onMouseEnter);
+      canvas.removeEventListener("mouseleave", onMouseLeave);
       ctxMap.delete(container);
       try {
         container.removeChild(canvas);
       } catch {}
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, []);
 
@@ -399,10 +413,15 @@ const WebThreads: React.FC<WebThreadsProps> = ({
     grain,
     grainIntensity,
     mouseInteraction,
-    mouseStrength
+    mouseStrength,
   ]);
 
-  return <div ref={containerRef} className={`web-threads-container ${className}`.trim()} />;
+  return (
+    <div
+      ref={containerRef}
+      className={`web-threads-container z-10 bg-transparent ${className}`.trim()}
+    />
+  );
 };
 
 export default WebThreads;

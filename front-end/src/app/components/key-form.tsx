@@ -66,14 +66,14 @@ export default function KeyForm({ onClose }: { onClose?: () => void }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative w-full max-w-lg flex flex-col gap-y-6 rounded-xl border border-border bg-[#0d0d0d] p-8"
+      className="relative w-full max-w-lg flex flex-col gap-y-6 rounded-xl border border-[#d9d9d9] dark:border-border bg-[#ededed] dark:bg-[#0d0d0d] p-8"
     >
       {onClose && (
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full text-text2 hover:text-text hover:bg-white/10 cursor-pointer"
+          className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full text-[#393932] dark:text-text2 hover:text-text hover:bg-white/10 cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -82,18 +82,20 @@ export default function KeyForm({ onClose }: { onClose?: () => void }) {
       <header className="flex flex-col gap-y-1">
         <div className="flex items-center gap-x-2">
           <KeyRound className="w-5 h-5 text-[#337fc5]" />
-          <h1 className="text-subheader font-semibold text-text">
+          <h1 className="text-subheader font-semibold text-[#191912] dark:text-text">
             {keys ? "Change your keys" : "Add your API keys"}
           </h1>
         </div>
-        <p className="text-small text-text2">
+        <p className="text-small text-[#292922] dark:text-text2">
           Held in this device&apos;s secure storage and used only for your own
           requests. Nothing is kept on a server.
         </p>
       </header>
 
       <label className="flex flex-col gap-y-1.5">
-        <span className="text-small text-text2">OpenAI API key</span>
+        <span className="text-small text-[#393932] dark:text-text2">
+          OpenAI API key
+        </span>
         <input
           type="password"
           value={openai}
@@ -106,7 +108,9 @@ export default function KeyForm({ onClose }: { onClose?: () => void }) {
       </label>
 
       <label className="flex flex-col gap-y-1.5">
-        <span className="text-small text-text2">YouTube Data API key</span>
+        <span className="text-small text-[#393932] dark:text-text2">
+          YouTube Data API key
+        </span>
         <input
           type="password"
           value={youtube}
@@ -139,7 +143,7 @@ export default function KeyForm({ onClose }: { onClose?: () => void }) {
             type="button"
             onClick={handleClear}
             disabled={clearing}
-            className="flex items-center gap-1.5 text-small text-[#898989] hover:text-red-500 enabled:cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 text-small text-[#292922] dark:text-[#898989] hover:text-red-500 enabled:cursor-pointer disabled:opacity-50"
           >
             <Trash2 className="w-3.5 h-3.5" />
             {clearing ? "Forgetting" : "Forget these keys"}

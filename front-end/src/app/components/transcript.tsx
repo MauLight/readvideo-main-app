@@ -36,21 +36,27 @@ function SegmentRow({ segment, onSeek, active, rowRef }: SegmentRowProps) {
       ref={rowRef}
       onClick={handleClick}
       className={`z-10 flex gap-x-3 h-10 items-center px-5 rounded-md cursor-pointer ${
-        active ? "bg-[#337fc5]" : "bg-border-form hover:bg-[#222222]"
+        active
+          ? "bg-[#337fc5]"
+          : "bg-[#dddddd] hover:bg-[#c9c9c9] dark:bg-border-form dark:hover:bg-[#222222]"
       }`}
     >
       <button
         type="button"
         onClick={handleClick}
         className={`shrink-0 text-[0.8rem] tabular-nums cursor-pointer ${
-          active ? "text-text" : "text-[#787879] hover:text-[#337fc5]"
+          active
+            ? "text-[#1d1c1b] dark:text-text"
+            : "text-[#787879] hover:text-[#337fc5]"
         }`}
       >
         {formatTimestamp(segment.offset)}
       </button>
       <p
-        className={`whitespace-pre-wrap leading-relaxed text-[#b8b8b9] text-[0.9rem] ${
-          active ? "text-text" : "text-[#b8b8b9] font-medium"
+        className={`whitespace-pre-wrap leading-relaxed text-[0.9rem] ${
+          active
+            ? "text-[#1d1c1b] dark:text-text"
+            : "text-[#464647] dark:text-[#b8b8b9] font-medium"
         }`}
       >
         {segment.text}
@@ -122,22 +128,24 @@ export default function Transcript() {
     <div className="relative w-full h-full">
       <div
         ref={scrollRef}
-        className="absolute inset-0 overflow-y-auto scrollbar-hide border border-border-form rounded-lg p-4 bg-[#0d0d0d] z-10"
+        className="absolute inset-0 overflow-y-auto scrollbar-hide border border-[#e9e9e9] dark:border-border-form rounded-lg p-4 bg-[#ededed] dark:bg-[#0d0d0d] z-10"
       >
         <div className="sticky -top-5 z-20 -mx-4 -mt-4 mb-2 px-4 pt-4 pb-3  flex items-center backdrop-blur-xs justify-between">
-          <span className="text-[#b8b8b9] z-10">Transcript</span>
+          <span className="text-[#484849] dark:text-[#b8b8b9] z-10">
+            Transcript
+          </span>
           <button
             type="button"
             onClick={handleToggle}
             className={`rounded-[10px] text-[0.9rem] px-4 h-9 border cursor-pointer z-10 ${
               sync
                 ? "bg-[#337fc5] text-text border-[#337fc5]"
-                : "border-border text-[#b8b8b9] hover:text-text"
+                : "border-border bg-border text-[#b8b8b9] hover:text-text"
             }`}
           >
             Sync {sync ? "on" : "off"}
           </button>
-          <div className="absolute z-0 top-0 left-0 w-full h-full bg-linear-to-b from-[#0d0d0d] from-30% to-transparent"></div>
+          <div className="absolute z-0 top-0 left-0 w-full h-full bg-linear-to-b from-[#ededed] dark:from-[#0d0d0d] from-30% to-transparent"></div>
         </div>
         <div className="flex flex-col gap-y-2">
           {segments.map((segment) => {

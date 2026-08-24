@@ -23,7 +23,7 @@ export default function KeysButton() {
         type="button"
         onClick={handleOpen}
         aria-label="Change API keys"
-        className="flex items-center gap-1.5 rounded-lg border border-border  px-4 h-9 text-[#b8b8b9] text-[0.9rem] hover:text-text cursor-pointer"
+        className="flex items-center gap-1.5 rounded-lg border border-border bg-border dark:bg-[#191919] px-4 h-9 text-[#b8b8b9] text-[0.9rem] hover:text-text cursor-pointer"
       >
         <KeyRound className="w-3.5 h-3.5" />
         Keys
@@ -34,7 +34,7 @@ export default function KeysButton() {
           Only reachable after a click, so `document` is always available. */}
       {open &&
         createPortal(
-          <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 backdrop-blur-md px-6">
+          <div className="fixed inset-0 z-100 flex items-center justify-center bg-white/70 dark:bg-black/70 backdrop-blur-md px-6">
             <KeyForm onClose={handleClose} />
           </div>,
           document.body,

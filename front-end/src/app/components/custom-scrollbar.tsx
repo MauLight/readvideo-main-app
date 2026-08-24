@@ -115,7 +115,7 @@ export default function CustomScrollbar({
           onClick={handleScrollTop}
           aria-label="Scroll to top"
           style={{ right: offset, bottom: `calc(${padY} - 2rem)` }}
-          className="absolute z-50 -mr-1.5 flex items-center justify-center w-6 h-6 text-[#6d6d6d] hover:text-text cursor-pointer"
+          className="absolute z-50 -mr-1.5 flex items-center justify-center w-6 h-6 text-[#7d7d7d] dark:text-[#6d6d6d] hover:text-[#1d1d1d] dark:hover:text-text cursor-pointer"
         >
           <SquareArrowUp className="w-5 h-5" />
         </button>

@@ -15,7 +15,7 @@ export default function MainColumn() {
   // input's move-to-center animation runs without its container resizing.
   return (
     <div
-      className={`relative col-span-1 flex h-full min-h-0 flex-col px-20 bg-[#181719] ${
+      className={`relative col-span-1 flex h-full min-h-0 flex-col px-20 bg-[#f8f7f9] dark:bg-[#181719] ${
         committed ? "justify-start gap-y-5 pt-4 pb-20" : "justify-end pb-20"
       }`}
     >

@@ -14,15 +14,26 @@ const rehypePlugins = [rehypeKatex];
 // Basic element styles so Markdown is readable without the Typography plugin.
 const markdownComponents = {
   h1: (props: React.ComponentProps<"h1">) => (
-    <h1 className="text-header font-semibold text-text" {...props} />
+    <h1
+      className="text-header font-semibold text-[#1d1c1b] dark:text-text"
+      {...props}
+    />
   ),
   h2: (props: React.ComponentProps<"h2">) => (
-    <h2 className="text-subheader font-semibold text-text mt-2" {...props} />
+    <h2
+      className="text-subheader font-semibold text-[#1d1c1b] dark:text-text mt-2"
+      {...props}
+    />
   ),
   h3: (props: React.ComponentProps<"h3">) => (
-    <h3 className="text-regular font-semibold text-text mt-2" {...props} />
+    <h3
+      className="text-regular font-semibold text-[#1d1c1b] dark:text-text mt-2"
+      {...props}
+    />
   ),
-  p: (props: React.ComponentProps<"p">) => <p {...props} />,
+  p: (props: React.ComponentProps<"p">) => (
+    <p className="text-[#2d2c2b] dark:text-[#edeceb]" {...props} />
+  ),
   ul: (props: React.ComponentProps<"ul">) => (
     <ul className="list-disc pl-6 flex flex-col gap-y-1" {...props} />
   ),
@@ -33,7 +44,10 @@ const markdownComponents = {
     <a className="text-[#337fc5] underline" {...props} />
   ),
   strong: (props: React.ComponentProps<"strong">) => (
-    <strong className="font-semibold text-text" {...props} />
+    <strong
+      className="font-semibold text-[#1d1c1b] dark:text-text"
+      {...props}
+    />
   ),
   // Fenced blocks arrive as <pre><code>; inline code keeps its own styling.
   pre: (props: React.ComponentProps<"pre">) => (
@@ -44,7 +58,7 @@ const markdownComponents = {
   ),
   code: (props: React.ComponentProps<"code">) => (
     <code
-      className="rounded bg-[#141414] px-1 py-0.5 font-mono text-[0.85rem] text-text"
+      className="rounded bg-[#141414] px-1 py-0.5 font-mono text-[0.85rem] text-[#1d1c1b] dark:text-text"
       {...props}
     />
   ),
@@ -59,7 +73,7 @@ const markdownComponents = {
   ),
   th: (props: React.ComponentProps<"th">) => (
     <th
-      className="border border-border px-3 py-1.5 font-semibold text-text"
+      className="border border-border px-3 py-1.5 font-semibold text-[#1d1c1b] dark:text-text"
       {...props}
     />
   ),
@@ -110,7 +124,7 @@ export default function ArticleBody({
   return (
     <article
       ref={ref}
-      className={`flex flex-col gap-y-4 text-text-[#c9c9c2] font-body leading-relaxed ${className}`}
+      className={`flex flex-col gap-y-4 font-body leading-relaxed ${className}`}
     >
       {markdown ? (
         <ReactMarkdown

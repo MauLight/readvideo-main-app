@@ -159,14 +159,14 @@ export default function Navbar() {
               className="flex gap-x-2 items-baseline"
             >
               <FilePlay className="text-red-800 h-6 w-6" />
-              <h1 className="text-[6rem] lowercase text-[#c9c9c2] font-title font-medium leading-19">
+              <h1 className="text-[6rem] lowercase text-[#191912] dark:text-[#c9c9c2] font-title font-medium leading-19">
                 Read Lecture Videos
               </h1>
             </motion.div>
             <motion.div
               animate={{ opacity: articleStatus !== "idle" ? 0 : 1 }}
               transition={{ duration: 0.5, ease: "easeInOut", delay: 0.5 }}
-              className="text-[#a9a9a2] text-[1.2rem] flex gap-x-1 items-center ml-10 font-title"
+              className="text-[#292922] dark:text-[#a9a9a2] text-[1.2rem] flex gap-x-1 items-center ml-10 font-title"
             >
               Translate
               <YouTubeLogo />
@@ -239,7 +239,7 @@ export default function Navbar() {
 function YouTubeLogo() {
   return (
     <p className="font-title leading-7">
-      <b className="text-[#c8c8c9] pr-0.75">You</b>
+      <b className="text-[#292922] dark:text-[#c8c8c9] pr-0.75">You</b>
       <b className="bg-linear-to-b from-red-800 to-red-900 text-[#c8c8c9] p-0.75 rounded-md mr-0.5">
         Tube
       </b>

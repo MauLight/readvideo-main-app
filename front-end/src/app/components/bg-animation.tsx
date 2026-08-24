@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import WebThreads from "@/component/WebThreads";
 import { useVideo } from "../context/video-context";
+import { useTheme } from "../context/themeContext";
 import {
   animate,
   motion,
@@ -14,6 +15,7 @@ import Image from "next/image";
 // The ready set is the idle set hue-rotated to green, so the two stay matched
 // in darkness — tweak freely, nothing else depends on these.
 const IDLE: [string, string, string] = ["#6f0b0b", "#6d040f", "#5f0000"];
+const IDLE_LIGHT: [string, string, string] = ["#110000", "#ff0000", "ff0000"];
 const READY: [string, string, string] = ["#0b6f0b", "#046d0f", "#005f00"];
 
 /** Matches Graphic's COLOR_FADE, so the accent shifts read as one change. */
@@ -52,10 +54,12 @@ function mixHex(from: Rgb, to: Rgb, t: number): string {
 
 // Parsed once — the endpoints never change.
 const IDLE_RGB = IDLE.map(toRgb) as [Rgb, Rgb, Rgb];
+const IDLE_LIGHT_RGB = IDLE_LIGHT.map(toRgb) as [Rgb, Rgb, Rgb];
 const READY_RGB = READY.map(toRgb) as [Rgb, Rgb, Rgb];
 
 export default function BgAnimation() {
   const { canTranscribe } = useVideo();
+  const { theme } = useTheme();
 
   // These are shader uniforms, not CSS, so no CSS transition can reach them.
   // One driver for all three channels keeps them in step.
@@ -68,16 +72,33 @@ export default function BgAnimation() {
     return () => controls.stop();
   }, [canTranscribe, progress]);
 
+  // Only the idle end is themed; READY is shared, so a verified link lands on
+  // the same green either way. Both branches are module constants, so this
+  // reference only changes when the theme actually flips.
+  const idleRgb = theme === "light" ? IDLE_LIGHT_RGB : IDLE_RGB;
+
+  const applyColors = useCallback(
+    (t: number) => {
+      setColors([
+        mixHex(idleRgb[0], READY_RGB[0], t),
+        mixHex(idleRgb[1], READY_RGB[1], t),
+        mixHex(idleRgb[2], READY_RGB[2], t),
+      ]);
+    },
+    [idleRgb],
+  );
+
   const handleProgress = useCallback(() => {
-    const t = progress.get();
-    setColors([
-      mixHex(IDLE_RGB[0], READY_RGB[0], t),
-      mixHex(IDLE_RGB[1], READY_RGB[1], t),
-      mixHex(IDLE_RGB[2], READY_RGB[2], t),
-    ]);
-  }, [progress]);
+    applyColors(progress.get());
+  }, [applyColors, progress]);
 
   useMotionValueEvent(progress, "change", handleProgress);
+
+  // Toggling the theme moves the idle endpoint without moving `progress`, so
+  // no change event fires — recolour from the current position instead.
+  useEffect(() => {
+    applyColors(progress.get());
+  }, [applyColors, progress]);
 
   return (
     <div className="absolute top-0 left-0 w-full h-full z-0">
@@ -89,10 +110,13 @@ export default function BgAnimation() {
           className="absolute inset-0 w-full h-full bg-[#046d0f]"
         ></motion.div>
       )}
+      {/* Two files rather than a CSS filter: the inverted art is drawn, not a
+          channel flip, so it can't be derived from the dark one. */}
       <Image
-        className="object-cover opacity-20"
-        src={"/brain.webp"}
-        alt="brain"
+        className="object-cover opacity-15 z-5"
+        src={theme === "light" ? "/brain_inverted.webp" : "/brain.webp"}
+        alt=""
+        aria-hidden
         fill
       />
       <WebThreads
@@ -104,7 +128,7 @@ export default function BgAnimation() {
         frequency={5}
         spread={0.18}
         taper={1}
-        position={0.595}
+        position={0.625}
         fanMode="center"
         glow={0.02}
         falloff={0.6}
@@ -117,6 +141,7 @@ export default function BgAnimation() {
         grainIntensity={0.05}
         mouseInteraction={false}
       />
+      <div className="absolute top-0 left-0 w-full h-full bg-white dark:bg-transparent z-0" />
     </div>
   );
 }

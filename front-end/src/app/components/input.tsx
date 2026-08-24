@@ -41,7 +41,7 @@ export default function Input({
     ? "bg-red-800 border-t border-red-700 shadow shadow-red-800"
     : pasted
       ? pastedClass
-      : "bg-[#121213] shadow-xl shadow-[#0d0d0f] border-t border-[#1f1f20]";
+      : "bg-[#c5bfbf] dark:bg-[#121213] shadow-xl shadow-[#a5a29f] dark:shadow-[#0d0d0f] border-t border-[#cfc6c6] dark:border-[#1f1f20]";
 
   // Clear button shows on error, or whenever the parent asks for it (success).
   const clearVisible = error || showClear;
@@ -55,7 +55,7 @@ export default function Input({
         onFocus={onFocus}
         name={label}
         placeholder={label}
-        className={`h-15 ${borderClass} rounded-xl pl-3 pr-20 w-full outline-0 text-[#b8b8b9] placeholder-[#49494a] resize-none overflow-hidden`}
+        className={`h-15 ${borderClass} rounded-xl pl-3 pr-20 w-full outline-0 :text-[#686869] dark:text-[#b8b8b9] placeholder-[#49494a] resize-none overflow-hidden`}
       />
       {clearVisible && (
         <button

@@ -25,8 +25,8 @@ export default function Graphic() {
   const accent = active ? (kind === "playlist" ? AMBER : GREEN) : RED;
 
   return (
-    <div className="w-full h-full flex justify-center items-center pb-40">
-      <div className="w-100 h-100 flex justify-center items-center border border-[#3f3f3a] rounded-full relative">
+    <div className="w-full h-full flex justify-center items-center pb-55">
+      <div className="w-100 h-100 flex justify-center items-center border border-[#999995] dark:border-[#252524] rounded-full relative z-20">
         <div className="absolute w-full h-full flex justify-center items-center">
           <div className="flex items-center gap-x-5">
             <div
@@ -39,19 +39,19 @@ export default function Graphic() {
 
               <div className="absolute inset-0 flex justify-center items-center">
                 {/* <div className="absolute w-35.5 h-40.5 bg-[#fa222f] animate-pulse backdrop-blur-2xl rounded-xl" /> */}
-                <div className="z-50 w-35 h-40 flex flex-col gap-y-1 justify-center items-center border border-border rounded-xl bg-linear-to-b from-[#191919] to-[#111111]">
+                <div className="z-50 w-35 h-40 flex flex-col gap-y-1 justify-center items-center border border-[#929292] dark:border-border rounded-xl shadow-[#a5a29f] dark:shadow-[#0d0d0f] bg-linear-to-b from-[#b6acac] to-[#b3b3b3] dark:from-[#191919] dark:to-[#111111]">
                   <>
                     {kind === "video" ? (
                       <>
-                        <SquarePlay className="w-10 h-10 text-[#c9c9c2]" />
-                        <p className="text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
+                        <SquarePlay className="w-10 h-10 text-[#393932] dark:text-[#c9c9c2]" />
+                        <p className="text-[#393932] dark:text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
                           Video
                         </p>
                       </>
                     ) : (
                       <>
-                        <ListVideo className="w-10 h-10 text-[#c9c9c2]" />
-                        <p className="text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
+                        <ListVideo className="w-10 h-10 text-[#393932] dark:text-[#c9c9c2]" />
+                        <p className="text-[#393932] dark:text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
                           Playlist
                         </p>
                       </>
@@ -112,9 +112,9 @@ export default function Graphic() {
                   animate={{ backgroundColor: accent }}
                   transition={COLOR_FADE}
                 />
-                <div className="z-50 w-35 h-40 flex flex-col gap-y-1 justify-center items-center border border-border rounded-xl bg-linear-to-b from-[#191919] to-[#111111]">
-                  <TextInitial className="w-10 h-10 text-[#c9c9c2]" />
-                  <p className="text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
+                <div className="z-50 w-35 h-40 flex flex-col gap-y-1 justify-center items-center border border-[#929292] dark:border-border rounded-xl shadow-[#a5a29f] dark:shadow-[#0d0d0f] bg-linear-to-b from-[#b6acac] to-[#b3b3b3] dark:from-[#191919] dark:to-[#111111]">
+                  <TextInitial className="w-10 h-10 text-[#393932] dark:text-[#c9c9c2]" />
+                  <p className="text-[#393932] dark:text-[#c9c9c2] uppercase text-[0.8rem] font-semibold">
                     Text
                   </p>
                 </div>
@@ -123,7 +123,7 @@ export default function Graphic() {
           </div>
         </div>
 
-        <div className="w-70 h-70 border border-[#4f4f4b] rounded-full" />
+        <div className="w-70 h-70 border border-[#999995] dark:border-[#2a2a29] rounded-full z-20" />
       </div>
     </div>
   );

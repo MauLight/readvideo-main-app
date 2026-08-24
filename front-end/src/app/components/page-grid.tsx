@@ -60,7 +60,7 @@ export default function PageGrid({ children }: { children: ReactNode }) {
             className="absolute top-0 left-0 w-full h-full flex justify-center items-center"
           >
             <Graphic />
-            <div className="absolute w-full h-full bg-[#191516]/70 z-10" />
+            <div className="absolute w-full h-full bg-[#fff6f6]/25 dark:bg-[#16161f]/50 z-10" />
             <BgAnimation />
           </motion.div>
         )}
