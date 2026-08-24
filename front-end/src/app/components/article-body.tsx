@@ -52,13 +52,13 @@ const markdownComponents = {
   // Fenced blocks arrive as <pre><code>; inline code keeps its own styling.
   pre: (props: React.ComponentProps<"pre">) => (
     <pre
-      className="overflow-x-auto rounded-lg border border-border bg-[#141414] p-4 text-[0.85rem]"
+      className="overflow-x-auto rounded-lg border border-border bg-[#ececec] dark:bg-[#141414] p-4 text-[0.85rem]"
       {...props}
     />
   ),
   code: (props: React.ComponentProps<"code">) => (
     <code
-      className="rounded bg-[#141414] px-1 py-0.5 font-mono text-[0.85rem] text-[#1d1c1b] dark:text-text"
+      className="rounded bg-[#ececec] dark:bg-[#141414] px-1 py-0.5 font-mono text-[0.85rem] text-[#1d1c1b] dark:text-text"
       {...props}
     />
   ),
@@ -78,10 +78,13 @@ const markdownComponents = {
     />
   ),
   td: (props: React.ComponentProps<"td">) => (
-    <td className="border border-border px-3 py-1.5" {...props} />
+    <td className="border border-border px-3 py-1.5 text-text" {...props} />
   ),
   blockquote: (props: React.ComponentProps<"blockquote">) => (
-    <blockquote className="border-l-2 border-border pl-4 italic" {...props} />
+    <blockquote
+      className="border-l-2 border-border pl-4 italic text-text"
+      {...props}
+    />
   ),
 };
 
@@ -124,7 +127,7 @@ export default function ArticleBody({
   return (
     <article
       ref={ref}
-      className={`flex flex-col gap-y-4 font-body leading-relaxed ${className}`}
+      className={`flex flex-col gap-y-4 font-body text-[#4d4c4b] dark:text-[#bdbcbb] leading-relaxed ${className}`}
     >
       {markdown ? (
         <ReactMarkdown

@@ -66,6 +66,8 @@ If the video includes specific technical information, preserve it accurately and
 
 Delimit math with dollar signs — $...$ inline and $$...$$ for a formula on its own line. Do not use \\( \\) or \\[ \\], which the renderer does not parse.
 
+This applies to LaTeX environments too. A \\begin{bmatrix} ... \\end{bmatrix}, or any other \\begin{...} ... \\end{...} block, must sit inside $$ ... $$ with the fences on their own lines. Left bare it is not treated as math at all, and it reaches the page as raw text. Separate matrix rows with \\\\ and never leave a blank line inside the $$ fences.
+
 YouTube Video Transcript:
 ${transcript}
 
