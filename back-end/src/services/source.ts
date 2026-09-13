@@ -16,6 +16,12 @@ export interface Source {
   kind: SourceKind;
   /** A YouTube URL for "youtube", an absolute path for "file". */
   ref: string;
+  /**
+   * An explicit batch of file paths, for a playlist built from loose files
+   * rather than a folder. Only meaningful on a "file" playlist source; a
+   * single-article run always uses `ref`.
+   */
+  refs?: string[];
 }
 
 /** Narrows unknown input from a request body or IPC payload. */
@@ -24,7 +30,12 @@ export function readSource(value: unknown): Source {
   const ref = typeof candidate?.ref === "string" ? candidate.ref.trim() : "";
   if (!ref) throw new TranscriptError("A source 'ref' string is required.");
 
-  if (candidate?.kind === "file") return { kind: "file", ref };
+  if (candidate?.kind === "file") {
+    const refs = Array.isArray(candidate.refs)
+      ? candidate.refs.filter((entry): entry is string => typeof entry === "string")
+      : undefined;
+    return refs?.length ? { kind: "file", ref, refs } : { kind: "file", ref };
+  }
   if (candidate?.kind === "youtube") return { kind: "youtube", ref };
 
   throw new TranscriptError(

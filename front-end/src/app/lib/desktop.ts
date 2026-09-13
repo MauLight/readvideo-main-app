@@ -31,7 +31,21 @@ export interface Source {
   kind: SourceKind;
   /** A YouTube URL, or an absolute path to a local file. */
   ref: string;
+  /** An explicit batch of files, for a playlist that isn't a whole folder. */
+  refs?: string[];
 }
+
+/** What main made of a drop: one article, a playlist, or nothing usable. */
+export type DropPlan =
+  | {
+      route: StreamRoute;
+      source: Source;
+      /** Shown before the manifest arrives. */
+      title: string;
+      /** 0 for a folder, whose contents aren't enumerated until the run. */
+      count: number;
+    }
+  | { route: null; reason: string };
 
 export interface StreamBody {
   source: Source;
@@ -80,6 +94,12 @@ export interface DesktopBridge {
   health: () => Promise<HealthPayload>;
   /** Needs no credentials — safe to call before the key form. */
   capabilities: () => Promise<Capabilities>;
+  files: {
+    /** Resolves a dropped File to a real path; only paths cross to main. */
+    pathFor: (file: File) => string;
+    /** Decides article vs playlist — the renderer has no fs to decide with. */
+    plan: (paths: string[]) => Promise<DropPlan>;
+  };
   /** oEmbed lives in main so YouTube's origin rules stop applying. */
   youtube: {
     verify: (target: YouTubeTarget) => Promise<boolean>;

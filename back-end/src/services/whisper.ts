@@ -35,6 +35,11 @@ export function whisperAvailable(): boolean {
   return binaries !== null;
 }
 
+/** The configured paths, or null. Callers that need ffmpeg alone use this. */
+export function whisperBinaries(): WhisperBinaries | null {
+  return binaries;
+}
+
 export interface TranscribeOptions {
   /** 0–1. whisper-cli reports progress on stderr; this forwards it. */
   onProgress?: (fraction: number) => void;

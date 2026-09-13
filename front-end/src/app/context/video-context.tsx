@@ -18,6 +18,7 @@ import {
   PlaylistItem,
   Segment,
 } from "../lib/api";
+import { Capabilities, requireDesktop, Source, StreamRoute } from "../lib/desktop";
 import {
   fetchVideoMeta,
   parseYouTubeLink,
@@ -65,6 +66,14 @@ interface VideoContextValue {
   transcript: string | null;
   segments: Segment[] | null;
   generate: () => void;
+  /** What this build can do — null until the probe answers. */
+  capabilities: Capabilities | null;
+  /** Start a run from dropped files or folders. */
+  startDrop: (files: File[]) => void;
+  /** Why the last drop was refused, cleared when another one starts. */
+  dropError: string | null;
+  /** Names a local run before its manifest arrives; null for YouTube runs. */
+  localTitle: string | null;
   playerRef: RefObject<HTMLIFrameElement | null>;
   seekTo: (seconds: number) => void;
 }
@@ -92,6 +101,12 @@ export function VideoProvider({ children }: { children: ReactNode }) {
   const [committed, setCommitted] = useState(false);
 
   const clearInput = useCallback(() => setInputValue(""), []);
+  // Typing hands control back to the YouTube path, which the url effect is
+  // otherwise guarded against while a local run owns the state.
+  const updateInput = useCallback((value: string) => {
+    setLocalTitle(null);
+    setInputValue(value);
+  }, []);
   // Derived, not stored: kept in step with the input without a second source
   // of truth. Updates as you type, ahead of the debounced verification.
   const link = useMemo(() => parseYouTubeLink(inputValue), [inputValue]);
@@ -116,10 +131,31 @@ export function VideoProvider({ children }: { children: ReactNode }) {
   const [segments, setSegments] = useState<Segment[] | null>(null);
   const playerRef = useRef<HTMLIFrameElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
+  const [dropError, setDropError] = useState<string | null>(null);
+  const [localTitle, setLocalTitle] = useState<string | null>(null);
+
+  // Probed once. Needs no credentials, so it runs before the key form and the
+  // drop target can be gated from the first paint.
+  useEffect(() => {
+    async function probe() {
+      try {
+        setCapabilities(await requireDesktop().capabilities());
+      } catch {
+        setCapabilities({ localTranscription: false, missing: ["bridge"] });
+      }
+    }
+    probe();
+  }, []);
 
   // When a verified URL arrives, load ONLY the preview metadata — no OpenAI
   // work. Generation is triggered explicitly via generate() (Transcribe).
   useEffect(() => {
+    // A dropped file owns this state instead. Without the guard, clearing the
+    // input while a local run is streaming would reset it to idle and drop the
+    // abort handle mid-flight.
+    if (localTitle) return;
+
     setArticle("");
     setChapters([]);
     setTranscript(null);
@@ -157,7 +193,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
     loadPreview(url);
 
     return () => controller.abort();
-  }, [url]);
+  }, [url, localTitle]);
 
   // Patch one chapter in place, keyed by its manifest index.
   const patchChapter = useCallback(
@@ -171,8 +207,105 @@ export function VideoProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  // Trigger the expensive part: health check, then stream. A playlist link
-  // goes to the playlist endpoint; anything else streams as a single article.
+  /**
+   * One run, whatever the source. A YouTube link and a dropped folder differ
+   * only in how the source and route are worked out; everything from the
+   * health check onwards is identical.
+   */
+  const runSource = useCallback(
+    async (source: Source, route: StreamRoute, controller: AbortController) => {
+      setStatus("loading");
+      setArticle("");
+      setChapters([]);
+      setTranscript(null);
+      setSegments(null);
+
+      try {
+        const health = await checkHealth();
+        if (!health.ok || health.status !== "ok") {
+          setStatus("error");
+          return;
+        }
+
+        if (route === "playlists") {
+          setPlaylistRunning(true);
+          try {
+            const outcome = await streamPlaylist(
+              source,
+              ARTICLE_STYLE,
+              {
+                // The manifest lands before any text, so the full chapter list
+                // can render immediately.
+                onManifest: (manifest) => {
+                  setChapters(
+                    manifest.items.map((item) => ({
+                      ...item,
+                      markdown: "",
+                      state: "pending",
+                    }))
+                  );
+                },
+                onItemStart: (item) => {
+                  patchChapter(item.index, { state: "streaming" });
+                  setStatus("streaming");
+                },
+                onChunk: (chunk) => {
+                  setChapters((prev) =>
+                    prev.map((chapter) =>
+                      chapter.index === chunk.index
+                        ? { ...chapter, markdown: chapter.markdown + chunk.text }
+                        : chapter
+                    )
+                  );
+                },
+                onItemDone: (item) => patchChapter(item.index, { state: "done" }),
+                // A failed chapter is skipped, not fatal — the run continues.
+                onItemError: (item) =>
+                  patchChapter(item.index, {
+                    state: "error",
+                    error: item.error,
+                    errorStatus: item.status,
+                  }),
+                onDone: () => setStatus("success"),
+                onError: () => setStatus("error"),
+              },
+              controller.signal
+            );
+
+            // No `done` frame means the connection closed early, not success.
+            if (outcome === "interrupted") setStatus("error");
+          } finally {
+            setPlaylistRunning(false);
+          }
+          return;
+        }
+
+        await streamArticle(
+          source,
+          ARTICLE_STYLE,
+          {
+            onTranscript: (data) => {
+              setTranscript(data.transcript);
+              setSegments(data.segments);
+            },
+            onChunk: (text) => {
+              setArticle((prev) => prev + text);
+              setStatus("streaming");
+            },
+            onDone: () => setStatus("success"),
+            onError: () => setStatus("error"),
+          },
+          controller.signal
+        );
+        } catch (err) {
+          if ((err as Error).name !== "AbortError") setStatus("error");
+        }
+    },
+    [patchChapter]
+  );
+
+  // Trigger the expensive part for the verified link. A playlist link goes to
+  // the playlist endpoint; anything else streams as a single article.
   const generate = useCallback(async () => {
     const controller = abortRef.current;
     if (!url || !controller) return;
@@ -183,93 +316,50 @@ export function VideoProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setStatus("loading");
-    setArticle("");
-    setChapters([]);
-    setTranscript(null);
-    setSegments(null);
+    await runSource(
+      { kind: "youtube", ref: url },
+      target.kind === "playlist" ? "playlists" : "articles",
+      controller
+    );
+  }, [url, runSource]);
 
-    try {
-      const health = await checkHealth();
-      if (!health.ok || health.status !== "ok") {
-        setStatus("error");
+  /**
+   * Dropped files. Main decides article vs playlist, because the renderer is
+   * sandboxed and has no fs to decide with — and it needs that answer before
+   * it can pick a route.
+   */
+  const startDrop = useCallback(
+    async (files: File[]) => {
+      setDropError(null);
+      if (!files.length) return;
+
+      let plan;
+      try {
+        const desktop = requireDesktop();
+        const paths = files.map((file) => desktop.files.pathFor(file));
+        plan = await desktop.files.plan(paths);
+      } catch {
+        setDropError("Couldn't read those files.");
         return;
       }
 
-      if (target.kind === "playlist") {
-        setPlaylistRunning(true);
-        try {
-          const outcome = await streamPlaylist(
-            { kind: "youtube", ref: url },
-            ARTICLE_STYLE,
-            {
-              // The manifest lands before any text, so the full chapter list
-              // can render immediately.
-              onManifest: (manifest) => {
-                setChapters(
-                  manifest.items.map((item) => ({
-                    ...item,
-                    markdown: "",
-                    state: "pending",
-                  }))
-                );
-              },
-              onItemStart: (item) => {
-                patchChapter(item.index, { state: "streaming" });
-                setStatus("streaming");
-              },
-              onChunk: (chunk) => {
-                setChapters((prev) =>
-                  prev.map((chapter) =>
-                    chapter.index === chunk.index
-                      ? { ...chapter, markdown: chapter.markdown + chunk.text }
-                      : chapter
-                  )
-                );
-              },
-              onItemDone: (item) => patchChapter(item.index, { state: "done" }),
-              // A failed chapter is skipped, not fatal — the run continues.
-              onItemError: (item) =>
-                patchChapter(item.index, {
-                  state: "error",
-                  error: item.error,
-                  errorStatus: item.status,
-                }),
-              onDone: () => setStatus("success"),
-              onError: () => setStatus("error"),
-            },
-            controller.signal
-          );
-
-          // No `done` frame means the connection closed early, not success.
-          if (outcome === "interrupted") setStatus("error");
-        } finally {
-          setPlaylistRunning(false);
-        }
+      if (plan.route === null) {
+        setDropError(plan.reason);
         return;
       }
 
-      await streamArticle(
-        { kind: "youtube", ref: url },
-        ARTICLE_STYLE,
-        {
-          onTranscript: (data) => {
-            setTranscript(data.transcript);
-            setSegments(data.segments);
-          },
-          onChunk: (text) => {
-            setArticle((prev) => prev + text);
-            setStatus("streaming");
-          },
-          onDone: () => setStatus("success"),
-          onError: () => setStatus("error"),
-        },
-        controller.signal
-      );
-    } catch (err) {
-      if ((err as Error).name !== "AbortError") setStatus("error");
-    }
-  }, [url, patchChapter]);
+      // A drop replaces whatever was on screen, including an in-flight run.
+      abortRef.current?.abort();
+      setMeta(null);
+      setLocalTitle(plan.title);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setCommitted(true);
+      await runSource(plan.source, plan.route, controller);
+    },
+    [runSource]
+  );
 
   /**
    * Re-run one failed chapter through the single-article endpoint. Uses its own
@@ -349,7 +439,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
     <VideoContext.Provider
       value={{
         inputValue,
-        setInputValue,
+        setInputValue: updateInput,
         clearInput,
         url,
         setUrl,
@@ -368,6 +458,10 @@ export function VideoProvider({ children }: { children: ReactNode }) {
         transcript,
         segments,
         generate,
+        capabilities,
+        startDrop,
+        dropError,
+        localTitle,
         playerRef,
         seekTo,
       }}

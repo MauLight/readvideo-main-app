@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
+import { contextBridge, ipcRenderer, IpcRendererEvent, webUtils } from "electron";
 
 /**
  * The only channel between the renderer and main.
@@ -31,6 +31,16 @@ interface Frame {
   event: string;
   data: Record<string, unknown>;
 }
+
+interface Source {
+  kind: "youtube" | "file";
+  ref: string;
+  refs?: string[];
+}
+
+type DropPlan =
+  | { route: "articles" | "playlists"; source: Source; title: string; count: number }
+  | { route: null; reason: string };
 
 interface Capabilities {
   localTranscription: boolean;
@@ -106,6 +116,16 @@ const desktop = {
   },
   health: () => ipcRenderer.invoke("health"),
   capabilities: (): Promise<Capabilities> => ipcRenderer.invoke("capabilities"),
+  files: {
+    /**
+     * A dropped File carries no usable path of its own — Electron removed
+     * File.path — so the real one is resolved here, where webUtils lives, and
+     * only paths cross into main.
+     */
+    pathFor: (file: File): string => webUtils.getPathForFile(file),
+    plan: (paths: string[]): Promise<DropPlan> =>
+      ipcRenderer.invoke("files:plan", paths),
+  },
 };
 
 contextBridge.exposeInMainWorld("desktop", desktop);

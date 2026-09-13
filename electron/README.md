@@ -36,7 +36,7 @@ The renderer already codes against a `DesktopBridge` contract
 | M8 local transcription capability | done — optional vendor fetch, runtime probe, capability over IPC |
 | M9 media + whisper services | done — ffmpeg + whisper.cpp produce the same `TranscriptData` as captions |
 | M10 source generalisation | done — `RunInput` takes a `Source`; playlist items carry one too |
-| M11 drop target | todo — one file to an article, several or a folder to a playlist; drive batches through `whisper-server` so the 1.5 GB model loads once, not per file |
+| M11 drop target | done — one file to an article, several or a folder to a playlist. `whisper-server` considered and rejected: a warm invocation costs ~1.7s, so per-file reload is ~1% of a batch |
 | M12 local player | todo — `<video>` bound to the active chapter, `seekTo` against it |
 
 ## Scripts

@@ -2,10 +2,15 @@ import { resolveTranscript } from "../services/source.js";
 import { TranscriptError } from "../services/transcript.js";
 import { streamArticle } from "../services/openai.js";
 import { getPlaylistVideos } from "../services/playlist.js";
+import { getFolderVideos } from "../services/folder.js";
+import { whisperBinaries } from "../services/whisper.js";
 import { Emit, RunInput, ValidationError } from "./types.js";
 
 /**
- * A playlist -> one streamed article per video, in order.
+ * A playlist -> one streamed article per item, in order.
+ *
+ * The playlist is either a YouTube list or a local folder; past the manifest
+ * the two are indistinguishable.
  *
  *   playlist   -> { playlistId, title, total, style, items }
  *   item_start -> { index, source, title }
@@ -17,6 +22,28 @@ import { Emit, RunInput, ValidationError } from "./types.js";
  * A video without captions is skipped and the run continues; only failures
  * before the manifest are thrown.
  */
+/**
+ * Where the item list comes from. Kept here rather than in services/source.ts
+ * to avoid a cycle: services/playlist.ts already imports from there.
+ */
+async function resolvePlaylist(
+  source: RunInput["source"],
+  youtubeKey: string | undefined,
+  signal: AbortSignal
+) {
+  if (source.kind === "youtube") {
+    return getPlaylistVideos(source.ref, youtubeKey);
+  }
+
+  const binaries = whisperBinaries();
+  if (!binaries) {
+    throw new ValidationError(
+      "This build can't read local folders. Run `npm run setup:local`, then rebuild."
+    );
+  }
+  return getFolderVideos(source, binaries.ffmpeg, signal);
+}
+
 export async function runPlaylist(
   { source: playlistSource, style, keys }: RunInput,
   emit: Emit,
@@ -27,7 +54,7 @@ export async function runPlaylist(
   }
 
   // Before the line: resolve the playlist so failures stay statusable.
-  const playlist = await getPlaylistVideos(playlistSource.ref, keys.youtube);
+  const playlist = await resolvePlaylist(playlistSource, keys.youtube, signal);
 
   emit("playlist", {
     playlistId: playlist.playlistId,
