@@ -1,4 +1,5 @@
-import { getTranscriptData, TranscriptError } from "../services/youtube.js";
+import { resolveTranscript } from "../services/source.js";
+import { TranscriptError } from "../services/transcript.js";
 import { streamArticle } from "../services/openai.js";
 import { getPlaylistVideos } from "../services/playlist.js";
 import { Emit, RunInput, ValidationError } from "./types.js";
@@ -7,7 +8,7 @@ import { Emit, RunInput, ValidationError } from "./types.js";
  * A playlist -> one streamed article per video, in order.
  *
  *   playlist   -> { playlistId, title, total, style, items }
- *   item_start -> { index, videoId, title }
+ *   item_start -> { index, source, title }
  *   chunk      -> { index, text }        (repeated per item)
  *   item_done  -> { index, status: "ok" }
  *   item_error -> { index, status: "no_transcript" | "error", error }
@@ -17,16 +18,16 @@ import { Emit, RunInput, ValidationError } from "./types.js";
  * before the manifest are thrown.
  */
 export async function runPlaylist(
-  { url, style, keys }: RunInput,
+  { source: playlistSource, style, keys }: RunInput,
   emit: Emit,
   signal: AbortSignal
 ): Promise<void> {
-  if (!url.trim()) {
-    throw new ValidationError("A YouTube playlist 'url' string is required.");
+  if (!playlistSource.ref.trim()) {
+    throw new ValidationError("A playlist source is required.");
   }
 
   // Before the line: resolve the playlist so failures stay statusable.
-  const playlist = await getPlaylistVideos(url, keys.youtube);
+  const playlist = await getPlaylistVideos(playlistSource.ref, keys.youtube);
 
   emit("playlist", {
     playlistId: playlist.playlistId,
@@ -44,15 +45,17 @@ export async function runPlaylist(
 
     emit("item_start", {
       index: video.index,
-      videoId: video.videoId,
+      source: video.source,
       title: video.title,
     });
 
     let transcript;
     try {
-      transcript = await getTranscriptData(
-        `https://www.youtube.com/watch?v=${video.videoId}`
-      );
+      transcript = await resolveTranscript(video.source, {
+        signal,
+        onProgress: (fraction) =>
+          emit("progress", { index: video.index, fraction }),
+      });
     } catch (err) {
       skipped++;
       const status = err instanceof TranscriptError ? "no_transcript" : "error";

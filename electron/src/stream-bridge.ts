@@ -2,6 +2,7 @@ import { IpcMainInvokeEvent, WebContents } from "electron";
 import { runArticle } from "back-end/runners/article";
 import { runPlaylist } from "back-end/runners/playlist";
 import type { Emit, RunInput } from "back-end/runners/types";
+import { readSource } from "back-end/services/source";
 import { checkOpenAI } from "back-end/services/openai";
 import { loadKeys } from "./key-store.js";
 
@@ -20,7 +21,7 @@ export type StreamRoute = "articles" | "playlists";
 
 export interface StreamRequest {
   route: StreamRoute;
-  body: { url: string; style: string };
+  body: { source: { kind: string; ref: string }; style: string };
   requestId: string;
 }
 
@@ -55,7 +56,7 @@ function isRequest(value: unknown): value is StreamRequest {
     requestId.length > 0 &&
     typeof body === "object" &&
     body !== null &&
-    typeof (body as Record<string, unknown>).url === "string"
+    typeof (body as Record<string, unknown>).source === "object"
   );
 }
 
@@ -88,7 +89,9 @@ export async function startStream(
   running.set(request.requestId, controller);
 
   const input: RunInput = {
-    url: request.body.url,
+    // Trusted here in a way the HTTP route can't be: a file path from the
+    // renderer came from the user's own drag-drop, not a remote caller.
+    source: readSource(request.body.source),
     style: readStyle(request.body.style),
     keys,
   };

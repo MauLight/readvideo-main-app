@@ -24,8 +24,17 @@ import type { ApiKeys } from "./keys";
 
 export type StreamRoute = "articles" | "playlists";
 
+/** Where a run gets its transcript from. */
+export type SourceKind = "youtube" | "file";
+
+export interface Source {
+  kind: SourceKind;
+  /** A YouTube URL, or an absolute path to a local file. */
+  ref: string;
+}
+
 export interface StreamBody {
-  url: string;
+  source: Source;
   style: string;
 }
 

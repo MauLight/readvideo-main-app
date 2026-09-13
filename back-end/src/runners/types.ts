@@ -1,5 +1,6 @@
 import { ApiKeys } from "../config.js";
 import { WritingStyle } from "../services/openai.js";
+import { Source } from "../services/source.js";
 
 /**
  * How a runner reports progress. Express turns these into SSE frames; Electron
@@ -8,7 +9,8 @@ import { WritingStyle } from "../services/openai.js";
 export type Emit = (event: string, payload: unknown) => void;
 
 export interface RunInput {
-  url: string;
+  /** What to transcribe. A YouTube link or a local file, decided upstream. */
+  source: Source;
   style: WritingStyle;
   keys: ApiKeys;
 }

@@ -21,7 +21,6 @@ import {
 import {
   fetchVideoMeta,
   parseYouTubeLink,
-  youtubeUrl,
   VideoMeta,
   YouTubeKind,
   YouTubeLink,
@@ -201,7 +200,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
         setPlaylistRunning(true);
         try {
           const outcome = await streamPlaylist(
-            url,
+            { kind: "youtube", ref: url },
             ARTICLE_STYLE,
             {
               // The manifest lands before any text, so the full chapter list
@@ -251,7 +250,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
       }
 
       await streamArticle(
-        url,
+        { kind: "youtube", ref: url },
         ARTICLE_STYLE,
         {
           onTranscript: (data) => {
@@ -293,7 +292,9 @@ export function VideoProvider({ children }: { children: ReactNode }) {
 
       try {
         await streamArticle(
-          youtubeUrl({ kind: "video", id: chapter.videoId }),
+          // The manifest already carries how to fetch this item, whatever it
+          // is — no need to rebuild a URL from an id that only YouTube has.
+          chapter.source,
           ARTICLE_STYLE,
           {
             onChunk: (text) => {

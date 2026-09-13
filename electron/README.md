@@ -35,7 +35,7 @@ The renderer already codes against a `DesktopBridge` contract
 | M7 packaging | done — unsigned .app/.dmg via electron-builder |
 | M8 local transcription capability | done — optional vendor fetch, runtime probe, capability over IPC |
 | M9 media + whisper services | done — ffmpeg + whisper.cpp produce the same `TranscriptData` as captions |
-| M10 source generalisation | todo — `RunInput` takes a source; `videoId` → `sourceRef` + `kind` |
+| M10 source generalisation | done — `RunInput` takes a `Source`; playlist items carry one too |
 | M11 drop target | todo — one file to an article, several or a folder to a playlist; drive batches through `whisper-server` so the 1.5 GB model loads once, not per file |
 | M12 local player | todo — `<video>` bound to the active chapter, `seekTo` against it |
 

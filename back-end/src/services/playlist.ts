@@ -1,9 +1,12 @@
 export class PlaylistError extends Error {}
 
+import { Source, youtubeSource } from "./source.js";
+
 export interface PlaylistVideo {
   /** Position in the playlist (0-based). */
   index: number;
-  videoId: string;
+  /** How to fetch this item — a YouTube link today, a file path for a folder. */
+  source: Source;
   title: string;
   /** Video length in seconds, or null if it couldn't be read. */
   durationSeconds: number | null;
@@ -147,7 +150,7 @@ export async function getPlaylistVideos(
     collected.sort((a, b) => a.position - b.position);
     const videos: PlaylistVideo[] = collected.map((v, index) => ({
       index,
-      videoId: v.videoId,
+      source: youtubeSource(v.videoId),
       title: v.title,
       durationSeconds: durations.get(v.videoId) ?? null,
     }));

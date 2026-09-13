@@ -4,6 +4,7 @@ import { WritingStyle } from "../services/openai.js";
 import { TranscriptError } from "../services/youtube.js";
 import { PlaylistError } from "../services/playlist.js";
 import { Emit, RunInput, ValidationError } from "../runners/types.js";
+import { readSource, Source } from "../services/source.js";
 
 const VALID_STYLES: WritingStyle[] = ["blog", "academic"];
 
@@ -22,6 +23,27 @@ export function readKeys(req: Request): ApiKeys {
   }
 
   return { openai, youtube: req.header("x-youtube-key")?.trim() || undefined };
+}
+
+/**
+ * Accepts either a `source` object or a bare `url`, which is read as YouTube.
+ *
+ * A "file" source names a path on the server's disk. Over IPC that's the whole
+ * point; over HTTP it would let any caller read arbitrary local media, so it is
+ * refused unless the operator opts in.
+ */
+function readBodySource(source: unknown, url: unknown): Source {
+  const resolved =
+    source === undefined && typeof url === "string"
+      ? { kind: "youtube" as const, ref: url }
+      : readSource(source);
+
+  if (resolved.kind === "file" && process.env.ALLOW_FILE_SOURCES !== "1") {
+    throw new ValidationError(
+      "File sources are disabled over HTTP. Set ALLOW_FILE_SOURCES=1 to allow them."
+    );
+  }
+  return resolved;
 }
 
 /**
@@ -92,9 +114,9 @@ export async function handleStream(
 
   try {
     const keys = readKeys(req);
-    const { url, style } = req.body ?? {};
+    const { source, url, style } = req.body ?? {};
     await run(
-      { url: typeof url === "string" ? url : "", style: readStyle(style), keys },
+      { source: readBodySource(source, url), style: readStyle(style), keys },
       emit,
       controller.signal
     );

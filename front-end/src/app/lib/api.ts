@@ -1,5 +1,6 @@
 import {
   abortError,
+  Source,
   FrameListener,
   newRequestId,
   requireDesktop,
@@ -41,7 +42,8 @@ export interface Segment {
 /** One video in a playlist manifest. `index` keys every later stream event. */
 export interface PlaylistItem {
   index: number; // 0-based position in the playlist
-  videoId: string;
+  /** How to fetch this item — a YouTube link, or a local file path. */
+  source: Source;
   title: string;
   durationSeconds: number | null; // null when the length couldn't be read
 }
@@ -58,7 +60,7 @@ export interface PlaylistManifest {
 /** `item_start` — that chapter began generating. */
 export interface PlaylistItemStartEvent {
   index: number; // matches a manifest item's index
-  videoId: string;
+  source: Source;
   title: string;
 }
 
@@ -106,20 +108,20 @@ export interface StreamHandlers {
 }
 
 /**
- * Stream an article (Markdown) from a YouTube URL via SSE.
+ * Stream an article (Markdown) from any source via SSE.
  *
  * Resolves when the stream closes. Network/HTTP failures throw; a mid-stream
  * `error` event is delivered through handlers.onError (not thrown).
  */
 export async function streamArticle(
-  url: string,
+  source: Source,
   style: ArticleStyle,
   handlers: StreamHandlers,
   signal?: AbortSignal
 ): Promise<void> {
   await runStream(
     "articles",
-    { url, style },
+    { source, style },
     (event, data) => {
       switch (event) {
         case "transcript":
@@ -173,7 +175,7 @@ export interface PlaylistStreamHandlers {
  * mid-stream failures are delivered through onItemError/onError (not thrown).
  */
 export async function streamPlaylist(
-  url: string,
+  source: Source,
   style: ArticleStyle,
   handlers: PlaylistStreamHandlers,
   signal?: AbortSignal
@@ -184,7 +186,7 @@ export async function streamPlaylist(
 
   await runStream(
     "playlists",
-    { url, style },
+    { source, style },
     (event, data) => {
       switch (event) {
         case "playlist":

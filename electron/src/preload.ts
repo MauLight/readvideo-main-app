@@ -70,7 +70,7 @@ const youtube = {
  */
 async function stream(
   route: "articles" | "playlists",
-  body: { url: string; style: string },
+  body: { source: { kind: string; ref: string }; style: string },
   requestId: string,
   onFrame: FrameListener
 ): Promise<void> {
