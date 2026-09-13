@@ -1,0 +1,21 @@
+import "dotenv/config";
+
+/**
+ * Process-level settings only.
+ *
+ * API keys are NOT here: they belong to the caller and arrive per request as
+ * headers, so nothing here can throw on import when the environment is empty.
+ */
+export const config = {
+  port: Number(process.env.PORT ?? 4000),
+  openaiModel: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+  /** Language the article is written in, whatever language the video is in. */
+  articleLanguage: process.env.ARTICLE_LANGUAGE ?? "English",
+  /** Caption track to ask YouTube for first; falls back to the default track. */
+  transcriptLang: process.env.TRANSCRIPT_LANG ?? "en",
+};
+
+/** The caller's credentials, threaded through the services per request. */
+export interface ApiKeys {
+  openai: string;
+}

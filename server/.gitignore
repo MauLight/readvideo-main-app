@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Credentials never belong in the repo — keys arrive per request as headers.
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
