@@ -11,6 +11,8 @@
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "//setup": "One command from a fresh clone: install, build all three, package the .app.",
+    "setup:local": "node scripts/setup-local.mjs",
+    "//setup:local": "Optional: ffmpeg + whisper-cli + Whisper model into electron/vendor/, for transcribing dropped files. Re-runnable; skips what's already there.",
     "build": "npm run build:backend && npm run build:renderer && npm run build:shell",
     "//build": "Order matters: the shell imports back-end/dist and serves front-end/out.",
     "build:backend": "npm run build --workspace back-end",

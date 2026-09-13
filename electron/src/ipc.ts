@@ -2,6 +2,7 @@ import { ipcMain } from "electron";
 import { clearKeys, loadKeys, saveKeys } from "./key-store.js";
 import { targetMeta, verifyTarget } from "./youtube.js";
 import { cancelStream, health, startStream } from "./stream-bridge.js";
+import { capabilities } from "./vendor.js";
 
 /**
  * Every channel the renderer can reach. Each is enumerated here and mirrored
@@ -20,6 +21,7 @@ export const CHANNELS = {
   streamCancel: "stream:cancel",
   streamFrame: "stream:frame",
   health: "health",
+  capabilities: "capabilities",
 } as const;
 
 export function registerIpc(): void {
@@ -44,4 +46,8 @@ export function registerIpc(): void {
   );
 
   ipcMain.handle(CHANNELS.health, () => health());
+
+  // Synchronous probe, no credentials: the renderer needs this before the
+  // key form to decide whether dropping a file is even possible.
+  ipcMain.handle(CHANNELS.capabilities, () => capabilities());
 }

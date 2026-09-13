@@ -16,3 +16,8 @@ out/
 
 # Packaged output
 release/
+
+# Optional local-transcription stack: ~1.6 GB of binaries and model weights,
+# fetched by `npm run setup:local`. The directory itself stays tracked.
+electron/vendor/*
+!electron/vendor/.gitkeep

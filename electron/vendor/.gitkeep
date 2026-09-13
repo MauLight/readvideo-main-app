@@ -1,0 +1,4 @@
+Optional local-transcription stack lives here: bin/ffmpeg, bin/whisper-cli,
+models/ggml-large-v3-turbo.bin. Fetched by `npm run setup:local`, never
+committed — see .gitignore. An empty directory is a valid state; the app
+probes it at launch and reports the capability as unavailable.

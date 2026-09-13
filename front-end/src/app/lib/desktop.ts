@@ -40,6 +40,14 @@ export interface HealthPayload {
   openai?: { ok: boolean; error?: string };
 }
 
+/** What this build can do, probed from disk at launch. */
+export interface Capabilities {
+  /** False in a YouTube-only build — setup didn't fetch the local stack. */
+  localTranscription: boolean;
+  /** Which pieces are absent, so the UI can name them rather than just refusing. */
+  missing: string[];
+}
+
 export interface YouTubeTarget {
   kind: "video" | "playlist";
   id: string;
@@ -61,6 +69,8 @@ export interface DesktopBridge {
   ) => Promise<void>;
   cancel: (requestId: string) => void;
   health: () => Promise<HealthPayload>;
+  /** Needs no credentials — safe to call before the key form. */
+  capabilities: () => Promise<Capabilities>;
   /** oEmbed lives in main so YouTube's origin rules stop applying. */
   youtube: {
     verify: (target: YouTubeTarget) => Promise<boolean>;

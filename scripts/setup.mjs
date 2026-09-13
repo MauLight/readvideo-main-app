@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { createInterface } from "node:readline/promises";
 import { platform, arch } from "node:process";
 
 /**
@@ -72,6 +73,41 @@ if (!existsSync("node_modules")) {
   run(npm, ["install"], "Installing dependencies (all three workspaces)");
 } else {
   console.log("\n▸ Dependencies already installed — skipping");
+}
+
+// --- optional capability -----------------------------------------------------
+
+/**
+ * Asked before the long build so the answer is given once, up front. Declining
+ * is not a one-way door — `npm run setup:local` adds it afterwards.
+ */
+async function askLocalTranscription() {
+  if (existsSync("electron/vendor/bin/whisper-cli")) {
+    console.log("\n\u25b8 Local transcription already installed \u2014 skipping");
+    return false;
+  }
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  console.log(`
+Optional: local transcription.
+
+  Lets the app turn dropped video and audio files into articles, not just
+  YouTube links with captions. Runs entirely on this machine.
+
+  Costs about 1.6 GB on disk (ffmpeg, whisper.cpp, and a Whisper model), and
+  needs cmake plus the Xcode Command Line Tools, since whisper.cpp is built
+  from source. The download is the slow part.
+
+  Skip it and the app still works for YouTube links; add it later with
+  \`npm run setup:local\`.`);
+
+  const answer = (await rl.question("\nInstall local transcription? [y/N] ")).trim().toLowerCase();
+  rl.close();
+  return answer === "y" || answer === "yes";
+}
+
+if (await askLocalTranscription()) {
+  run(npm, ["run", "setup:local"], "Installing the local transcription stack");
 }
 
 run(npm, ["run", "build"], "Building backend, renderer and shell");

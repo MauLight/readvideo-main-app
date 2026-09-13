@@ -32,6 +32,11 @@ interface Frame {
   data: Record<string, unknown>;
 }
 
+interface Capabilities {
+  localTranscription: boolean;
+  missing: string[];
+}
+
 type StreamResult =
   | { status: "done" }
   | { status: "aborted" }
@@ -100,6 +105,7 @@ const desktop = {
     ipcRenderer.send("stream:cancel", requestId);
   },
   health: () => ipcRenderer.invoke("health"),
+  capabilities: (): Promise<Capabilities> => ipcRenderer.invoke("capabilities"),
 };
 
 contextBridge.exposeInMainWorld("desktop", desktop);

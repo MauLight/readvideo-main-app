@@ -33,6 +33,11 @@ The renderer already codes against a `DesktopBridge` contract
 | M5 streaming runners over IPC | done (unverified with a real key) |
 | M6 player + print verification | done |
 | M7 packaging | done — unsigned .app/.dmg via electron-builder |
+| M8 local transcription capability | todo — optional vendor fetch, runtime probe, renderer gating |
+| M9 media + whisper services | todo — extract 16 kHz mono audio, transcribe to `TranscriptData` |
+| M10 source generalisation | todo — `RunInput` takes a source; `videoId` → `sourceRef` + `kind` |
+| M11 drop target | todo — one file to an article, several or a folder to a playlist; drive batches through `whisper-server` so the 1.5 GB model loads once, not per file |
+| M12 local player | todo — `<video>` bound to the active chapter, `seekTo` against it |
 
 ## Scripts
 

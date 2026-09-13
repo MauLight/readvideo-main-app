@@ -19,6 +19,14 @@ extraResources:
     to: renderer
     filter:
       - "**/*"
+  # Optional local-transcription stack. Usually empty — `npm run setup:local`
+  # fills it. Kept as a tracked directory so this source always resolves, and
+  # so a YouTube-only build costs nothing here.
+  - from: vendor
+    to: vendor
+    filter:
+      - "**/*"
+      - "!.gitkeep"
 
 asar: true
 
