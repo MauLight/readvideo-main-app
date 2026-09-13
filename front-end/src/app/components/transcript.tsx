@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useYouTubeLink } from "../hooks/useYouTubeLink";
 import { useVideo } from "../context/video-context";
 import { Segment } from "../lib/api";
 import CustomScrollbar from "./custom-scrollbar";
@@ -66,35 +65,10 @@ function SegmentRow({ segment, onSeek, active, rowRef }: SegmentRowProps) {
 }
 
 export default function Transcript() {
-  const link = useYouTubeLink();
-  const { segments, seekTo, committed } = useVideo();
+  const { segments, seekTo, committed, currentTime } = useVideo();
   const [sync, setSync] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const activeRowRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Track the player's playback time via the iframe's postMessage events.
-  useEffect(() => {
-    function onMessage(event: MessageEvent) {
-      if (!event.origin.includes("youtube.com")) return;
-      let data = event.data;
-      if (typeof data === "string") {
-        try {
-          data = JSON.parse(data);
-        } catch {
-          return;
-        }
-      }
-      if (
-        data?.event === "infoDelivery" &&
-        typeof data.info?.currentTime === "number"
-      ) {
-        setCurrentTime(data.info.currentTime);
-      }
-    }
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
 
   // The last segment whose start time has been reached.
   const ms = currentTime * 1000;
@@ -122,7 +96,9 @@ export default function Transcript() {
     setSync((prev) => !prev);
   }
 
-  if (!link || !committed || !segments?.length) return null;
+  // No link check: a dropped file has no YouTube link, and segments only
+  // exist once a run produced them either way.
+  if (!committed || !segments?.length) return null;
 
   return (
     <div className="relative w-full h-full">

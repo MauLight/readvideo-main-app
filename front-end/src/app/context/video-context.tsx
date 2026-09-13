@@ -74,6 +74,14 @@ interface VideoContextValue {
   dropError: string | null;
   /** Names a local run before its manifest arrives; null for YouTube runs. */
   localTitle: string | null;
+  /** The local file the player should show, or null for a YouTube run. */
+  activeLocalRef: string | null;
+  /** Points the player at a specific chapter, once a run has finished. */
+  selectLocalRef: (ref: string) => void;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  /** Seconds into whichever player is mounted. Drives transcript sync. */
+  currentTime: number;
+  setCurrentTime: (seconds: number) => void;
   playerRef: RefObject<HTMLIFrameElement | null>;
   seekTo: (seconds: number) => void;
 }
@@ -105,6 +113,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
   // otherwise guarded against while a local run owns the state.
   const updateInput = useCallback((value: string) => {
     setLocalTitle(null);
+    setActiveLocalRef(null);
     setInputValue(value);
   }, []);
   // Derived, not stored: kept in step with the input without a second source
@@ -134,6 +143,35 @@ export function VideoProvider({ children }: { children: ReactNode }) {
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
   const [dropError, setDropError] = useState<string | null>(null);
   const [localTitle, setLocalTitle] = useState<string | null>(null);
+  const [activeLocalRef, setActiveLocalRef] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const selectLocalRef = useCallback((ref: string) => setActiveLocalRef(ref), []);
+
+  // Playback time used to be read in the transcript panel, from YouTube's
+  // postMessage events. It lives here now because a local <video> reports it a
+  // completely different way, and the panel shouldn't know which it got.
+  useEffect(() => {
+    function onMessage(event: MessageEvent) {
+      if (!event.origin.includes("youtube.com")) return;
+      let data = event.data;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
+      if (
+        data?.event === "infoDelivery" &&
+        typeof data.info?.currentTime === "number"
+      ) {
+        setCurrentTime(data.info.currentTime);
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   // Probed once. Needs no credentials, so it runs before the key form and the
   // drop target can be gated from the first paint.
@@ -352,6 +390,10 @@ export function VideoProvider({ children }: { children: ReactNode }) {
       abortRef.current?.abort();
       setMeta(null);
       setLocalTitle(plan.title);
+      setCurrentTime(0);
+      // A single file can play immediately; a playlist waits for item_start,
+      // since its files aren't known until the manifest is built.
+      setActiveLocalRef(plan.route === "articles" ? plan.source.ref : null);
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -424,6 +466,15 @@ export function VideoProvider({ children }: { children: ReactNode }) {
   // Drive the YouTube player via the IFrame API over postMessage
   // (the embed must include ?enablejsapi=1 — see VideoComponent).
   const seekTo = useCallback((seconds: number) => {
+    // A local run has a real element, so seeking is direct. Only the YouTube
+    // path needs the postMessage dance.
+    const local = videoRef.current;
+    if (local) {
+      local.currentTime = seconds;
+      void local.play();
+      return;
+    }
+
     const win = playerRef.current?.contentWindow;
     if (!win) return;
     const send = (func: string, args: unknown[] = []) =>
@@ -462,6 +513,11 @@ export function VideoProvider({ children }: { children: ReactNode }) {
         startDrop,
         dropError,
         localTitle,
+        activeLocalRef,
+        selectLocalRef,
+        videoRef,
+        currentTime,
+        setCurrentTime,
         playerRef,
         seekTo,
       }}

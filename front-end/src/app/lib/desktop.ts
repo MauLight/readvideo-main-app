@@ -99,6 +99,8 @@ export interface DesktopBridge {
     pathFor: (file: File) => string;
     /** Decides article vs playlist — the renderer has no fs to decide with. */
     plan: (paths: string[]) => Promise<DropPlan>;
+    /** A URL a <video> can load; file:// is refused from an http origin. */
+    mediaUrl: (file: string) => string;
   };
   /** oEmbed lives in main so YouTube's origin rules stop applying. */
   youtube: {

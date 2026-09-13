@@ -3,6 +3,7 @@ import path from "node:path";
 import { serveRenderer, StaticServer } from "./static-server.js";
 import { configureWhisper } from "back-end/services/whisper";
 import { capabilities, vendorPaths } from "./vendor.js";
+import { registerMediaScheme, serveMedia } from "./media-protocol.js";
 import { registerIpc } from "./ipc.js";
 import { cancelAll } from "./stream-bridge.js";
 import { runSmokeCheck } from "./smoke.js";
@@ -25,6 +26,10 @@ import { runSmokeCheck } from "./smoke.js";
  * Setting it once keeps the data directory the same everywhere.
  */
 app.setName("ReadVideo");
+
+// Must happen before app ready, or the scheme has none of the privileges that
+// make streaming and range requests work.
+registerMediaScheme();
 
 /** Where the built renderer lives, packaged or not. */
 function rendererRoot(): string {
@@ -90,6 +95,7 @@ function createWindow(url: string): void {
  */
 async function start(): Promise<void> {
   registerIpc();
+  serveMedia();
 
   // The back-end can't resolve these itself: it has no business importing
   // electron, and it also runs as a standalone server. Injected once here,

@@ -125,6 +125,9 @@ const desktop = {
     pathFor: (file: File): string => webUtils.getPathForFile(file),
     plan: (paths: string[]): Promise<DropPlan> =>
       ipcRenderer.invoke("files:plan", paths),
+    /** A URL a <video> can actually load — file:// is refused from an http page. */
+    mediaUrl: (file: string): string =>
+      `readvideo-media://media/?p=${encodeURIComponent(file)}`,
   },
 };
 

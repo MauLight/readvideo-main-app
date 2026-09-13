@@ -2,6 +2,7 @@ import { stat } from "node:fs/promises";
 import path from "node:path";
 import { MEDIA_EXTENSIONS } from "back-end/services/media";
 import type { Source } from "back-end/services/source";
+import { allowMedia } from "./media-protocol.js";
 
 /**
  * Turns whatever was dropped into a decision: one article, or a playlist.
@@ -41,6 +42,10 @@ export async function planDrop(
     : [];
 
   if (!candidates.length) return { route: null, reason: "Nothing usable was dropped." };
+
+  // Playback reads these back through the media scheme, which serves nothing
+  // it wasn't handed here.
+  allowMedia(candidates);
 
   const directories: string[] = [];
   const files: string[] = [];
