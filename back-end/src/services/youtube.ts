@@ -3,6 +3,17 @@ import {
   YoutubeTranscriptNotAvailableLanguageError,
 } from "youtube-transcript";
 import { config } from "../config.js";
+import {
+  joinSegments,
+  TranscriptData,
+  TranscriptError,
+  TranscriptSegment,
+} from "./transcript.js";
+
+// Re-exported: callers imported these from here before transcript sources were
+// plural, and there's no reason to churn them.
+export { TranscriptError };
+export type { TranscriptData, TranscriptSegment };
 
 // YouTube video ids are exactly 11 chars of [A-Za-z0-9_-].
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
@@ -63,26 +74,6 @@ export function extractVideoId(url: string): string | null {
   return null;
 }
 
-export class TranscriptError extends Error {}
-
-export interface TranscriptSegment {
-  /** Caption text for this segment. */
-  text: string;
-  /** Start time in milliseconds. */
-  offset: number;
-  /** How long the segment is shown, in milliseconds. */
-  duration: number;
-}
-
-export interface TranscriptData {
-  /** The whole transcript joined into one string. */
-  text: string;
-  /** Individual timestamped segments. */
-  segments: TranscriptSegment[];
-  /** ISO code of the track we actually got, when YouTube reports one. */
-  lang?: string;
-}
-
 /**
  * Fetches the transcript for a YouTube URL as both a joined string and
  * timestamped segments. Throws TranscriptError with a client-friendly
@@ -118,7 +109,7 @@ export async function getTranscriptData(url: string): Promise<TranscriptData> {
       duration: s.duration,
     }));
     return {
-      text: segments.map((s) => s.text).join(" "),
+      text: joinSegments(segments),
       segments,
       lang: raw[0]?.lang,
     };

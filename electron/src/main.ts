@@ -1,6 +1,8 @@
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 import { serveRenderer, StaticServer } from "./static-server.js";
+import { configureWhisper } from "back-end/services/whisper";
+import { capabilities, vendorPaths } from "./vendor.js";
 import { registerIpc } from "./ipc.js";
 import { cancelAll } from "./stream-bridge.js";
 import { runSmokeCheck } from "./smoke.js";
@@ -88,6 +90,18 @@ function createWindow(url: string): void {
  */
 async function start(): Promise<void> {
   registerIpc();
+
+  // The back-end can't resolve these itself: it has no business importing
+  // electron, and it also runs as a standalone server. Injected once here,
+  // and only when every piece is actually present.
+  const local = capabilities();
+  if (local.localTranscription) {
+    const paths = vendorPaths();
+    configureWhisper({ ffmpeg: paths.ffmpeg, cli: paths.whisper, model: paths.model });
+    console.log("Local transcription available");
+  } else {
+    console.log(`Local transcription unavailable — missing: ${local.missing.join(", ")}`);
+  }
 
   const devUrl = process.env.RENDERER_URL;
   if (devUrl) {
