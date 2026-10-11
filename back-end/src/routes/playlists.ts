@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { runPlaylist } from "../runners/playlist.js";
-import { handleStream } from "./sse.js";
+import { handleStream, readRunInput } from "./sse.js";
 
 export const playlistsRouter = Router();
 
@@ -10,5 +10,11 @@ export const playlistsRouter = Router();
  * adapter over it.
  */
 playlistsRouter.post("/stream", async (req: Request, res: Response) => {
-  await handleStream(req, res, runPlaylist, "Failed to generate the playlist.");
+  await handleStream(
+    req,
+    res,
+    runPlaylist,
+    readRunInput,
+    "Failed to generate the playlist."
+  );
 });

@@ -47,6 +47,18 @@ interface Capabilities {
   missing: string[];
 }
 
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+type StreamRoute = "articles" | "playlists" | "ask";
+
+/** "ask" carries a transcript and a conversation instead of a source. */
+type StreamBody =
+  | { source: Source; style: string }
+  | { transcript: string; messages: ChatMessage[] };
+
 type StreamResult =
   | { status: "done" }
   | { status: "aborted" }
@@ -79,8 +91,8 @@ const youtube = {
  * preserved by name — the renderer's guards match on that.
  */
 async function stream(
-  route: "articles" | "playlists",
-  body: { source: { kind: string; ref: string }; style: string },
+  route: StreamRoute,
+  body: StreamBody,
   requestId: string,
   onFrame: FrameListener
 ): Promise<void> {

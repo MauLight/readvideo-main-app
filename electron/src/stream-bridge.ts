@@ -1,7 +1,9 @@
 import { IpcMainInvokeEvent, WebContents } from "electron";
 import { runArticle } from "back-end/runners/article";
 import { runPlaylist } from "back-end/runners/playlist";
-import type { Emit, RunInput } from "back-end/runners/types";
+import { runAsk } from "back-end/runners/ask";
+import type { AskInput, Emit, RunInput } from "back-end/runners/types";
+import type { ChatMessage } from "back-end/services/openai";
 import { readSource } from "back-end/services/source";
 import { checkOpenAI } from "back-end/services/openai";
 import { loadKeys } from "./key-store.js";
@@ -17,13 +19,23 @@ import { loadKeys } from "./key-store.js";
  * Credentials never cross the bridge: they're read from safeStorage here.
  */
 
-export type StreamRoute = "articles" | "playlists";
+export type StreamRoute = "articles" | "playlists" | "ask";
 
-export interface StreamRequest {
-  route: StreamRoute;
-  body: { source: { kind: string; ref: string }; style: string };
-  requestId: string;
-}
+/**
+ * Discriminated on route, because "ask" takes a transcript and a conversation
+ * rather than a source — see AskInput in back-end/runners/types.
+ */
+export type StreamRequest =
+  | {
+      route: "articles" | "playlists";
+      body: { source: { kind: string; ref: string }; style: string };
+      requestId: string;
+    }
+  | {
+      route: "ask";
+      body: { transcript: string; messages: ChatMessage[] };
+      requestId: string;
+    };
 
 /**
  * Outcomes are returned, not thrown. An ipcMain.handle rejection reaches the
@@ -47,16 +59,33 @@ function readStyle(value: unknown): WritingStyle {
     : "blog";
 }
 
+function isMessages(value: unknown): value is ChatMessage[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((entry) => {
+      if (typeof entry !== "object" || entry === null) return false;
+      const { role, content } = entry as Record<string, unknown>;
+      return (
+        (role === "user" || role === "assistant") && typeof content === "string"
+      );
+    })
+  );
+}
+
 function isRequest(value: unknown): value is StreamRequest {
   if (typeof value !== "object" || value === null) return false;
   const { route, body, requestId } = value as Record<string, unknown>;
+  if (typeof requestId !== "string" || requestId.length === 0) return false;
+  if (typeof body !== "object" || body === null) return false;
+
+  const fields = body as Record<string, unknown>;
+  if (route === "ask") {
+    return typeof fields.transcript === "string" && isMessages(fields.messages);
+  }
   return (
     (route === "articles" || route === "playlists") &&
-    typeof requestId === "string" &&
-    requestId.length > 0 &&
-    typeof body === "object" &&
-    body !== null &&
-    typeof (body as Record<string, unknown>).source === "object"
+    typeof fields.source === "object"
   );
 }
 
@@ -88,18 +117,28 @@ export async function startStream(
   const controller = new AbortController();
   running.set(request.requestId, controller);
 
-  const input: RunInput = {
-    // Trusted here in a way the HTTP route can't be: a file path from the
-    // renderer came from the user's own drag-drop, not a remote caller.
-    source: readSource(request.body.source),
-    style: readStyle(request.body.style),
-    keys,
-  };
-
-  const run = request.route === "playlists" ? runPlaylist : runArticle;
+  const emit = frameSender(event.sender, request.requestId);
 
   try {
-    await run(input, frameSender(event.sender, request.requestId), controller.signal);
+    if (request.route === "ask") {
+      const input: AskInput = {
+        transcript: request.body.transcript,
+        messages: request.body.messages,
+        keys,
+      };
+      await runAsk(input, emit, controller.signal);
+      return controller.signal.aborted ? { status: "aborted" } : { status: "done" };
+    }
+
+    const input: RunInput = {
+      // Trusted here in a way the HTTP route can't be: a file path from the
+      // renderer came from the user's own drag-drop, not a remote caller.
+      source: readSource(request.body.source),
+      style: readStyle(request.body.style),
+      keys,
+    };
+    const run = request.route === "playlists" ? runPlaylist : runArticle;
+    await run(input, emit, controller.signal);
     return controller.signal.aborted ? { status: "aborted" } : { status: "done" };
   } catch (err) {
     if (controller.signal.aborted) return { status: "aborted" };

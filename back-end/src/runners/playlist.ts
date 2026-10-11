@@ -14,6 +14,7 @@ import { Emit, RunInput, ValidationError } from "./types.js";
  *
  *   playlist   -> { playlistId, title, total, style, items }
  *   item_start -> { index, source, title }
+ *   transcript -> { index, transcript }  (before that item's text)
  *   chunk      -> { index, text }        (repeated per item)
  *   item_done  -> { index, status: "ok" }
  *   item_error -> { index, status: "no_transcript" | "error", error }
@@ -91,6 +92,11 @@ export async function runPlaylist(
       emit("item_error", { index: video.index, status, error: message });
       continue;
     }
+
+    // Carried to the client so a playlist can be asked about afterwards. The
+    // single-article runner emits the same event; this one is keyed by index
+    // because a playlist has one transcript per chapter.
+    emit("transcript", { index: video.index, transcript: transcript.text });
 
     try {
       for await (const delta of streamArticle(

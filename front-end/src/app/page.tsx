@@ -3,6 +3,7 @@ import ReaderPane from "./components/reader-pane";
 import Graphic from "./components/graphic";
 import PageGrid from "./components/page-grid";
 import { VideoProvider } from "./context/video-context";
+import { ChatProvider } from "./context/chat-context";
 import { KeysProvider } from "./context/keys-context";
 import KeysGate from "./components/keys-gate";
 
@@ -12,16 +13,18 @@ export default function Home() {
       <KeysProvider>
         <KeysGate>
           <VideoProvider>
-            <PageGrid>
-              <MainColumn />
-              <div className="absolute bottom-2 right-5 text-[0.8rem] bg-transparent text-[#1f1f12] dark:text-[#5f5f52] z-50">
-                © Ctlst 2026 ® - Your Video Transcriber
-              </div>
-              <div className="relative h-full min-h-0 overflow-hidden bg-[#e9e9f2] dark:bg-[#090912] px-20">
-                <ReaderPane />
-                {/* <AnimatedBg /> */}
-              </div>
-            </PageGrid>
+            <ChatProvider>
+              <PageGrid>
+                <MainColumn />
+                <div className="absolute bottom-2 right-5 text-[0.8rem] bg-transparent text-[#1f1f12] dark:text-[#5f5f52] z-50">
+                  © Ctlst 2026 ® - Your Video Transcriber
+                </div>
+                <div className="relative h-full min-h-0 overflow-hidden bg-[#e9e9f2] dark:bg-[#090912] px-20">
+                  <ReaderPane />
+                  {/* <AnimatedBg /> */}
+                </div>
+              </PageGrid>
+            </ChatProvider>
           </VideoProvider>
         </KeysGate>
       </KeysProvider>

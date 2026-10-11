@@ -1,5 +1,5 @@
 import { ApiKeys } from "../config.js";
-import { WritingStyle } from "../services/openai.js";
+import { ChatMessage, WritingStyle } from "../services/openai.js";
 import { Source } from "../services/source.js";
 
 /**
@@ -26,3 +26,17 @@ export class ValidationError extends Error {}
  *   - Anything that fails AFTER it is emitted as an `error`/`item_error` frame,
  *     because the response has already begun.
  */
+
+/**
+ * What an ask run needs. Deliberately not a Source: the transcript already
+ * exists by the time anyone can ask about it, so re-resolving it would mean
+ * re-transcribing a local file for every question.
+ *
+ * History travels with the request because the back-end holds no sessions.
+ */
+export interface AskInput {
+  transcript: string;
+  /** Oldest first, ending with the question being asked now. */
+  messages: ChatMessage[];
+  keys: ApiKeys;
+}

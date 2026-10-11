@@ -89,6 +89,8 @@ interface VideoContextValue {
 /** One playlist entry plus the article streaming into it. */
 export interface Chapter extends PlaylistItem {
   markdown: string;
+  /** The source text this chapter was generated from, for asking about it. */
+  transcript?: string;
   state: "pending" | "streaming" | "done" | "error";
   /** Set when state is "error" — why this chapter was skipped. */
   error?: string;
@@ -287,6 +289,8 @@ export function VideoProvider({ children }: { children: ReactNode }) {
                   patchChapter(item.index, { state: "streaming" });
                   setStatus("streaming");
                 },
+                onTranscript: (item) =>
+                  patchChapter(item.index, { transcript: item.transcript }),
                 onChunk: (chunk) => {
                   setChapters((prev) =>
                     prev.map((chapter) =>

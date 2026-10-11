@@ -22,7 +22,13 @@
 
 import type { ApiKeys } from "./keys";
 
-export type StreamRoute = "articles" | "playlists";
+export type StreamRoute = "articles" | "playlists" | "ask";
+
+/** One turn of a conversation about a transcript. */
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
 
 /** Where a run gets its transcript from. */
 export type SourceKind = "youtube" | "file";
@@ -47,10 +53,14 @@ export type DropPlan =
     }
   | { route: null; reason: string };
 
-export interface StreamBody {
-  source: Source;
-  style: string;
-}
+/**
+ * Discriminated by the route it is sent to. "ask" carries the transcript and
+ * the whole conversation, because main holds no session state — the renderer
+ * owns the history.
+ */
+export type StreamBody =
+  | { source: Source; style: string }
+  | { transcript: string; messages: ChatMessage[] };
 
 export type FrameListener = (
   event: string,

@@ -91,21 +91,39 @@ function statusFor(err: unknown): number {
   return 500;
 }
 
-type Runner = (
-  input: RunInput,
+type Runner<Input> = (
+  input: Input,
   emit: Emit,
   signal: AbortSignal
 ) => Promise<void>;
+
+/** Builds a runner's input from the request. Throws for anything malformed. */
+export type InputReader<Input> = (req: Request, keys: ApiKeys) => Input;
+
+/** The source/style input that article and playlist runs take. */
+export const readRunInput: InputReader<RunInput> = (req, keys) => {
+  const { source, url, style } = req.body ?? {};
+  return {
+    source: readBodySource(source, url),
+    style: readStyle(style),
+    keys,
+  };
+};
 
 /**
  * Wires a runner to an Express request: reads keys, streams frames, aborts the
  * run if the client hangs up, and answers with JSON when it fails before the
  * first frame.
+ *
+ * Generic over the runner's input so a run that takes something other than a
+ * Source — asking about an existing transcript, say — reuses the whole
+ * transport: key reading, deferred headers, status mapping, abort on hangup.
  */
-export async function handleStream(
+export async function handleStream<Input>(
   req: Request,
   res: Response,
-  run: Runner,
+  run: Runner<Input>,
+  readInput: InputReader<Input>,
   fallbackMessage: string
 ): Promise<void> {
   const { emit, started } = sseEmitter(res);
@@ -114,12 +132,7 @@ export async function handleStream(
 
   try {
     const keys = readKeys(req);
-    const { source, url, style } = req.body ?? {};
-    await run(
-      { source: readBodySource(source, url), style: readStyle(style), keys },
-      emit,
-      controller.signal
-    );
+    await run(readInput(req, keys), emit, controller.signal);
   } catch (err) {
     if (!started()) {
       const status = statusFor(err);

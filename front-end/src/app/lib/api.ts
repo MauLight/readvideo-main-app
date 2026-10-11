@@ -1,5 +1,6 @@
 import {
   abortError,
+  ChatMessage,
   Source,
   FrameListener,
   newRequestId,
@@ -7,6 +8,8 @@ import {
   StreamBody,
   StreamRoute,
 } from "./desktop";
+
+export type { ChatMessage };
 
 /**
  * Client for the article backend, which lives in the Electron main process.
@@ -62,6 +65,12 @@ export interface PlaylistItemStartEvent {
   index: number; // matches a manifest item's index
   source: Source;
   title: string;
+}
+
+/** `transcript` — that chapter's source text, before its article streams. */
+export interface PlaylistTranscriptEvent {
+  index: number;
+  transcript: string;
 }
 
 /** `chunk` — a slice of one chapter's article. Append in arrival order. */
@@ -152,6 +161,8 @@ export interface PlaylistStreamHandlers {
   /** Opening frame: the full chapter list, before any text arrives. */
   onManifest?: (manifest: PlaylistManifest) => void;
   onItemStart?: (item: PlaylistItemStartEvent) => void;
+  /** That chapter's transcript, so the finished playlist can be asked about. */
+  onTranscript?: (item: PlaylistTranscriptEvent) => void;
   onChunk?: (chunk: PlaylistChunkEvent) => void;
   onItemDone?: (item: PlaylistItemDoneEvent) => void;
   /** One chapter failed; the run continues with the next. */
@@ -166,7 +177,9 @@ export interface PlaylistStreamHandlers {
  * Stream a playlist's articles (Markdown) from a YouTube URL via SSE.
  *
  * Frames arrive as: one `playlist` manifest, then per chapter
- * `item_start` -> zero or more `chunk` -> exactly one `item_done`/`item_error`.
+ * `item_start` -> `transcript` -> zero or more `chunk` -> exactly one
+ * `item_done`/`item_error`. A chapter with no transcript goes straight from
+ * `item_start` to `item_error`.
  * Chapters are keyed by `index`, matching the manifest.
  *
  * Resolves when the stream closes, returning how it ended: "done" if the
@@ -195,6 +208,9 @@ export async function streamPlaylist(
         case "item_start":
           handlers.onItemStart?.(data as unknown as PlaylistItemStartEvent);
           break;
+        case "transcript":
+          handlers.onTranscript?.(data as unknown as PlaylistTranscriptEvent);
+          break;
         case "chunk":
           handlers.onChunk?.(data as unknown as PlaylistChunkEvent);
           break;
@@ -217,6 +233,47 @@ export async function streamPlaylist(
   );
 
   return outcome;
+}
+
+export interface AnswerStreamHandlers {
+  onChunk?: (text: string) => void;
+  onDone?: () => void;
+  onError?: (error: string) => void;
+}
+
+/**
+ * Stream one answer about `transcript`, continuing `messages`.
+ *
+ * The whole conversation is sent every turn — the back-end keeps no sessions —
+ * and the transcript rides along rather than being re-resolved, which for a
+ * local file would mean re-running Whisper per question.
+ *
+ * Same frame vocabulary as an article, so the chunk handling is identical.
+ */
+export async function streamAnswer(
+  transcript: string,
+  messages: ChatMessage[],
+  handlers: AnswerStreamHandlers,
+  signal?: AbortSignal
+): Promise<void> {
+  await runStream(
+    "ask",
+    { transcript, messages },
+    (event, data) => {
+      switch (event) {
+        case "chunk":
+          handlers.onChunk?.((data.text as string) ?? "");
+          break;
+        case "done":
+          handlers.onDone?.();
+          break;
+        case "error":
+          handlers.onError?.((data.error as string) ?? "Failed to answer.");
+          break;
+      }
+    },
+    signal
+  );
 }
 
 /**

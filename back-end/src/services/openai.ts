@@ -99,3 +99,67 @@ export async function* streamArticle(
     if (delta) yield delta;
   }
 }
+
+/** One turn of a transcript conversation. System messages are built here. */
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+/**
+ * The whole transcript goes in the system message on every turn.
+ *
+ * No retrieval step: a 30-minute lecture is ~6k tokens against a 128k context,
+ * so chunking would only cost recall — "what did they argue overall?" needs the
+ * whole thing, and a top-k retriever would hand over three fragments.
+ *
+ * Grounding is a prompt rule, which makes it firm but not provable. Treat an
+ * off-transcript answer as possible, not impossible.
+ */
+function buildAnswerPrompt(transcript: string): string {
+  const { articleLanguage } = config;
+  return `You answer questions about one specific video transcript, and nothing else.
+
+Rules:
+- The transcript below is your only source. Answer from it alone.
+- If the transcript does not contain the answer, say so plainly. Do not fall back on general knowledge, and do not guess.
+- If asked about anything other than this transcript — unrelated topics, writing tasks, general conversation — decline in one short sentence and say what you can help with instead.
+- Be concise by default. Expand only when asked for detail.
+- Answer in ${articleLanguage}, whatever language the transcript is in.
+
+Format with Markdown. Delimit math with dollar signs — $...$ inline and $$...$$ for a formula on its own line. Do not use \\( \\) or \\[ \\], which the renderer does not parse.
+
+Transcript:
+${transcript}`;
+}
+
+/**
+ * Streams an answer about `transcript`, continuing the conversation in
+ * `messages` (oldest first, ending with the new question).
+ *
+ * The caller owns the history: nothing is stored here, so the same back-end
+ * serves any number of conversations without session state.
+ */
+export async function* streamAnswer(
+  transcript: string,
+  messages: ChatMessage[],
+  apiKey: string,
+  signal?: AbortSignal
+): AsyncGenerator<string> {
+  const stream = await clientFor(apiKey).chat.completions.create(
+    {
+      model: config.openaiModel,
+      messages: [
+        { role: "system", content: buildAnswerPrompt(transcript) },
+        ...messages,
+      ],
+      stream: true,
+    },
+    { signal }
+  );
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta) yield delta;
+  }
+}

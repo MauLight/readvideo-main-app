@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { runArticle } from "../runners/article.js";
-import { handleStream } from "./sse.js";
+import { handleStream, readRunInput } from "./sse.js";
 
 export const articlesRouter = Router();
 
@@ -10,5 +10,11 @@ export const articlesRouter = Router();
  * adapter over it.
  */
 articlesRouter.post("/stream", async (req: Request, res: Response) => {
-  await handleStream(req, res, runArticle, "Failed to generate the article.");
+  await handleStream(
+    req,
+    res,
+    runArticle,
+    readRunInput,
+    "Failed to generate the article."
+  );
 });

@@ -3,6 +3,7 @@ import cors from "cors";
 import { config } from "./config.js";
 import { articlesRouter } from "./routes/articles.js";
 import { playlistsRouter } from "./routes/playlists.js";
+import { askRouter } from "./routes/ask.js";
 import { checkOpenAI } from "./services/openai.js";
 import { readKeys } from "./routes/sse.js";
 
@@ -49,6 +50,9 @@ app.use("/api/articles", articlesRouter);
 
 // Playlist -> serialized articles (streamed).
 app.use("/api/playlists", playlistsRouter);
+
+/** Questions about a transcript that has already been produced. */
+app.use("/api/ask", askRouter);
 
 app.listen(config.port, () => {
   console.log(`Server listening on http://localhost:${config.port}`);

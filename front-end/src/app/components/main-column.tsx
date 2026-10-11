@@ -7,12 +7,20 @@ import KeysButton from "./keys-button";
 import ThemeButton from "./theme-button";
 import VideoComponent from "./video";
 import Transcript from "./transcript";
+import MessageList from "./message-list";
+import { useChat } from "../context/chat-context";
+import Intelligencebar from "./Intelligencebar";
 
 export default function MainColumn() {
   const { committed } = useVideo();
+  const { active: asking } = useChat();
 
   // Stable full-height container: only the vertical alignment changes, so the
   // input's move-to-center animation runs without its container resizing.
+  //
+  // Navbar and video are shrink-0 and the transcript takes what is left: it is
+  // the only child that scrolls, so it is the only one that should absorb the
+  // leftover height. Letting it size itself instead squeezed the video.
   return (
     <div
       className={`relative col-span-1 flex h-full min-h-0 flex-col px-20 bg-[#f8f7f9] dark:bg-[#181719] ${
@@ -37,8 +45,18 @@ export default function MainColumn() {
       </AnimatePresence>
 
       <Navbar />
-      <VideoComponent />
-      <Transcript />
+      {committed && <Intelligencebar />}
+      {/* Asking takes the pane over: the video and transcript go, the
+          conversation arrives in their place. "Back to video" in MessageList
+          clears it and brings them back. */}
+      {asking ? (
+        <MessageList />
+      ) : (
+        <>
+          <VideoComponent />
+          <Transcript />
+        </>
+      )}
     </div>
   );
 }
