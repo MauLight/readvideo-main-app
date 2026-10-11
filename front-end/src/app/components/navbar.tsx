@@ -139,7 +139,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="z-50 w-full">
+    <nav className="z-50 w-full shrink-0">
       <motion.div
         layout="position"
         transition={{ type: "spring", stiffness: 90, damping: 20 }}

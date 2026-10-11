@@ -30,7 +30,7 @@ export default function VideoComponent() {
   }
 
   return (
-    <div className="z-10 w-full aspect-video border border-border-light dark:border-border-form rounded-lg overflow-hidden">
+    <div className="z-10 w-full shrink-0 aspect-video border border-border-light dark:border-border-form rounded-lg overflow-hidden">
       <iframe
         ref={playerRef}
         onLoad={handleLoad}
@@ -54,7 +54,7 @@ export default function VideoComponent() {
     }
 
     return (
-      <div className="z-10 w-full aspect-video border border-border-light dark:border-border-form rounded-lg overflow-hidden bg-black">
+      <div className="z-10 w-full shrink-0 aspect-video border border-border-light dark:border-border-form rounded-lg overflow-hidden bg-black">
         <video
           ref={videoRef}
           onTimeUpdate={handleTimeUpdate}

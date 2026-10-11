@@ -101,7 +101,7 @@ export default function Transcript() {
   if (!committed || !segments?.length) return null;
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full flex-1 min-h-0">
       <div
         ref={scrollRef}
         className="absolute inset-0 overflow-y-auto scrollbar-hide border border-[#e9e9e9] dark:border-border-form rounded-lg p-4 bg-[#ededed] dark:bg-[#0d0d0d] z-10"
