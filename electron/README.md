@@ -38,7 +38,7 @@ The renderer already codes against a `DesktopBridge` contract
 | M10 source generalisation | done — `RunInput` takes a `Source`; playlist items carry one too |
 | M11 drop target | done — one file to an article, several or a folder to a playlist. `whisper-server` considered and rejected: a warm invocation costs ~1.7s, so per-file reload is ~1% of a batch |
 | M12 local player | done — `<video>` over a custom media scheme with byte ranges, `seekTo` against it |
-| M13 ask a transcript | built, unverified — `runners/ask.ts`, `/api/ask/stream`, the `"ask"` IPC route, `ChatProvider`, `MessageList`. Asking swaps the video and transcript for the conversation |
+| M13 ask a transcript | done — verified against a single video. `runners/ask.ts`, `/api/ask/stream`, the `"ask"` IPC route, `ChatProvider`, `MessageList`. Asking swaps the video and transcript for the conversation |
 | M14 playlist transcripts reach the client | built, unverified — per-chapter `transcript` frame, `Chapter.transcript`, chapters stitched into one subject under a character budget |
 | M15 topic extraction | `{ topic, keyTerms[], from, to }[]` per chapter, produced alongside the article. Labels are written to be read aloud in a reasoning trace, not just matched against |
 | M16 index as state | `Chapter.topics` plus a course-level view. No store: the index has exactly the lifetime of the chapters it describes |
@@ -48,7 +48,7 @@ The renderer already codes against a `DesktopBridge` contract
 | M20 reasoning trace | what the agent consulted, above each answer, collapsible, each span a seek target |
 | M21 citations | each claim tied to the moment that supports it. Not navigation — the check that catches an answer the routing got right and the model invented anyway |
 
-M13 and M14 are on disk and compile; neither has answered a real question yet.
+M14 is on disk and compiles, but no playlist has been asked about yet.
 
 Why no retrieval, and then why routing: one hour of speech is roughly 12k tokens, so a
 single lecture fits a 128k context whole and chunking it would only lose the questions
